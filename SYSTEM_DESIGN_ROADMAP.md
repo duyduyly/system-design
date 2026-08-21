@@ -1,119 +1,191 @@
 # System Design Learning Roadmap
 
-A structured roadmap for learning system design from the lowest practical layer—data and application code—to distributed systems and large-scale architecture.
+A practical, layered curriculum for learning system design from backend fundamentals to production distributed systems, geo-distributed architecture, and architecture evolution.
+
+The goal is **not** to memorize architecture diagrams or product names. The goal is to reason from:
+
+```text
+requirements
+    ↓
+invariants
+    ↓
+workload and scale
+    ↓
+data and boundaries
+    ↓
+communication
+    ↓
+failure behavior
+    ↓
+deployment and operations
+    ↓
+security, reliability, performance, and cost
+    ↓
+trade-offs
+```
+
+A strong design decision should be explainable in this form:
+
+> Because requirement **X** exists, choose mechanism **Y** despite cost **Z**. If **X** changes, reconsider **Y**.
+
+---
 
 ## Quick navigation
 
 - [How to use this roadmap](#how-to-use-this-roadmap)
-- [The seven layers](#the-seven-layers)
-- [Layer 1: Data and storage](#layer-1-data-and-storage)
-- [Layer 2: Application and code](#layer-2-application-and-code)
-- [Layer 3: Communication and networking](#layer-3-communication-and-networking)
-- [Layer 4: Messaging and integration](#layer-4-messaging-and-integration)
-- [Layer 5: Server and infrastructure](#layer-5-server-and-infrastructure)
-- [Layer 6: Distributed systems](#layer-6-distributed-systems)
-- [Layer 7: System architecture and system design](#layer-7-system-architecture-and-system-design)
+- [The nine layers](#the-nine-layers)
+- [Layer 1 — Data and storage](#layer-1--data-and-storage)
+- [Layer 2 — Application runtime and code](#layer-2--application-runtime-and-code)
+- [Layer 3 — Networking and communication](#layer-3--networking-and-communication)
+- [Layer 4 — Codebase architecture](#layer-4--codebase-architecture)
+- [Layer 5 — Messaging and integration](#layer-5--messaging-and-integration)
+- [Layer 6 — Infrastructure and platform](#layer-6--infrastructure-and-platform)
+- [Layer 7 — Distributed systems](#layer-7--distributed-systems)
+- [Layer 8 — Geo-distributed systems](#layer-8--geo-distributed-systems)
+- [Layer 9 — System architecture and evolution](#layer-9--system-architecture-and-evolution)
 - [Cross-cutting concerns](#cross-cutting-concerns)
-- [How the layers connect](#how-the-layers-connect)
-- [Recommended learning order](#recommended-learning-order)
-- [Practice projects](#practice-projects)
+- [One evolving capstone](#one-evolving-capstone)
+- [Focused practice projects](#focused-practice-projects)
+- [Recommended learning plan](#recommended-learning-plan)
 - [System design interview workflow](#system-design-interview-workflow)
 - [Mastery checklist](#mastery-checklist)
-- [Glossary](#glossary)
+- [Reading and course map](#reading-and-course-map)
+- [Final mental model](#final-mental-model)
+
+---
 
 ## How to use this roadmap
 
-System design is not one isolated subject. It is the discipline of combining many lower-level engineering concepts to build a system that satisfies functional and non-functional requirements.
+System design is a composition skill. Learn lower-level mechanisms first, then combine them only when a requirement justifies the complexity.
 
-A useful mental model is:
+### Depth labels
+
+Every topic can be learned at one of three depths:
+
+| Label | Meaning |
+| --- | --- |
+| **MUST** | Core knowledge for a strong backend engineer and system-design interviews |
+| **SHOULD** | Important production knowledge for senior backend/distributed-system work |
+| **ADVANCED** | Specialized knowledge that becomes valuable at large scale or in specific platforms |
+
+Do **not** try to master every advanced product before moving forward.
+
+### Learning loop for every topic
+
+Use the same loop repeatedly:
+
+1. **Problem** — what problem exists without this mechanism?
+2. **Mechanism** — how does it work?
+3. **Trade-offs** — what does it make slower, harder, more expensive, or less consistent?
+4. **Failure** — what happens when it partially fails?
+5. **Measurement** — what metric or experiment proves the behavior?
+6. **Alternative** — when should another mechanism be preferred?
+7. **Practice** — implement, benchmark, break, and recover it.
+
+### Three levels of progression
 
 ```text
-Level 7  System architecture and system design
-            ↑
-Level 6  Distributed systems
-            ↑
-Level 5  Server and infrastructure
-            ↑
-Level 4  Messaging and integration
-            ↑
-Level 3  Communication and networking
-            ↑
-Level 2  Application and code
-            ↑
-Level 1  Data and storage
+Level I — Backend System Fundamentals
+Layers 1–3
+
+Level II — Production Distributed Backend
+Layers 4–7
+
+Level III — Large-Scale Architecture
+Layers 8–9
 ```
 
-Do not try to memorize complete architectures first. Learn the building blocks, understand their trade-offs, and then practice combining them.
+A well-designed modular monolith can remain the correct architecture indefinitely. Microservices, event sourcing, service meshes, distributed SQL, and multi-region writes are **trade-offs**, not promotions.
 
-For every technology or pattern, ask four questions:
+---
 
-1. What problem does it solve?
-2. How does it work?
-3. What does it cost or complicate?
-4. When should I choose it instead of an alternative?
+## The nine layers
 
-That reasoning is more important than memorizing product names.
-
-## The seven layers
-
-| Layer | Main question | Typical topics |
+| Layer | Main question | Representative topics |
 | --- | --- | --- |
-| 1. Data and storage | How is data stored, queried, protected, and scaled? | SQL, NoSQL, indexes, transactions, replication, partitioning |
-| 2. Application and code | How does one application process a request safely and efficiently? | application layers, concurrency, transactions, background jobs |
-| 3. Communication and networking | How do clients and services communicate? | HTTP, REST, WebSocket, SSE, gRPC, DNS, TCP |
-| 4. Messaging and integration | How do independent components communicate asynchronously? | queues, Kafka, RabbitMQ, pub/sub, retries, DLQ |
-| 5. Server and infrastructure | Where does the application run and how is traffic delivered? | Linux, Nginx, containers, load balancers, CDN, Kubernetes |
-| 6. Distributed systems | How do multiple machines behave as one reliable system? | consistency, availability, replication, consensus, resilience |
-| 7. System architecture and system design | How should all components be combined for a real product? | requirements, capacity, APIs, data model, scaling, trade-offs |
+| **1. Data and storage** | How is state represented, queried, protected, and scaled? | SQL, indexes, transactions, WAL, replication, sharding, cache, search |
+| **2. Application runtime and code** | How does one application execute work safely and efficiently? | processes, threads, concurrency, I/O, pools, transactions, idempotency |
+| **3. Networking and communication** | How do clients and services exchange data? | DNS, TCP, TLS, HTTP, REST, gRPC, WebSocket, SSE |
+| **4. Codebase architecture** | How should business complexity be partitioned before distribution? | monolith, modular monolith, Clean/Hexagonal, DDD, bounded contexts |
+| **5. Messaging and integration** | How do components communicate asynchronously and evolve independently? | queues, streams, Kafka, RabbitMQ, outbox, CDC, schemas, saga |
+| **6. Infrastructure and platform** | How does the system run, deploy, scale, and get observed? | Linux, Docker, Kubernetes, IaC, CI/CD, OTel, SLOs |
+| **7. Distributed systems** | How do multiple nodes behave correctly under partial failure? | CAP/PACELC, consensus, locks, quorums, clocks, resilience |
+| **8. Geo-distributed systems** | What changes when latency, data, and failure domains span regions? | multi-region, active-active, geo-partitioning, RTO/RPO |
+| **9. System architecture and evolution** | How should all pieces be combined and changed over time? | requirements, capacity, decomposition, microservices, migration, cost |
 
-## Layer 1: Data and storage
+The ordering is intentional:
 
-This layer answers the question: **where does the system's state live?**
+```text
+Data
+  ↓
+Runtime
+  ↓
+Network
+  ↓
+Code boundaries
+  ↓
+Messaging
+  ↓
+Platform
+  ↓
+Distributed guarantees
+  ↓
+Geo distribution
+  ↓
+Architecture synthesis and evolution
+```
 
-Most system design decisions eventually affect data. A system can often survive a temporary application-server failure, but losing or corrupting persistent data can be catastrophic.
+---
 
-### 1.1 Relational databases
+# Layer 1 — Data and storage
+
+**Primary question:** Where does system state live, and how can it be read, changed, recovered, and scaled safely?
+
+**Difficulty:** intermediate → advanced
+
+## 1.1 Relational modeling — MUST
 
 Learn:
 
-- tables, rows, and columns
-- primary keys and foreign keys
-- relationships: one-to-one, one-to-many, many-to-many
+- tables, rows, columns
+- primary and foreign keys
+- one-to-one, one-to-many, many-to-many
 - normalization and denormalization
 - joins
 - constraints
-- views
-- stored procedures and triggers at a conceptual level
 - schema migrations
+- data invariants
+- access-pattern-driven modeling
 
-Typical technologies:
+Ask:
+
+- Which data must be unique?
+- Which fields must change atomically?
+- What are the dominant read/write paths?
+- Which queries require low latency?
+- What grows fastest?
+
+Good learning databases:
 
 - PostgreSQL
-- MySQL
-- MariaDB
-- SQL Server
-- Oracle Database
+- MySQL/InnoDB
 
-Understand why relational databases are strong when the domain benefits from structured schemas, relationships, constraints, and transactions.
-
-### 1.2 Indexes
-
-Indexes are one of the most important database topics for backend engineers.
+## 1.2 Indexes and query plans — MUST
 
 Learn:
 
 - B-tree indexes
 - hash indexes conceptually
-- clustered vs non-clustered indexes
 - composite indexes
 - covering indexes
-- index selectivity
+- selectivity
 - leftmost-prefix behavior
+- clustered vs non-clustered concepts
 - read amplification vs write amplification
-- why too many indexes slow writes
 - query execution plans
+- index maintenance cost
 
-You should be able to explain why this query may need an index:
+Be able to explain why an index such as `(customer_id, created_at)` may help:
 
 ```sql
 SELECT id, customer_id, total_amount
@@ -123,242 +195,283 @@ ORDER BY created_at DESC
 LIMIT 20;
 ```
 
-and why an index such as `(customer_id, created_at)` may help depending on the database and query plan.
+but also why adding indexes can reduce write throughput.
 
-### 1.3 Transactions and ACID
+## 1.3 Transactions, isolation, locking, and MVCC — MUST
 
-Learn the ACID properties:
+Learn:
 
-- **Atomicity** — all operations in a transaction succeed or all fail.
-- **Consistency** — a transaction preserves defined data rules.
-- **Isolation** — concurrent transactions should not incorrectly interfere with one another.
-- **Durability** — committed data survives failures according to the database's durability guarantees.
-
-Learn common isolation levels:
-
-- Read Uncommitted
+- ACID
+- transaction boundaries
 - Read Committed
 - Repeatable Read
 - Serializable
-
-Understand anomalies such as:
-
 - dirty reads
 - non-repeatable reads
-- phantom reads
+- phantoms
 - lost updates
-
-### 1.4 Locking and concurrency control
-
-Learn:
-
+- write skew
 - optimistic locking
 - pessimistic locking
-- row locks
-- table locks
 - deadlocks
 - MVCC
-- version columns
 
-Example use case: preventing two users from purchasing the last available item at the same time.
+Do not confuse **transaction isolation** with distributed-system consistency models such as linearizability.
 
-### 1.5 SQL vs NoSQL
-
-Do not treat this as a competition. They solve overlapping but different problems.
-
-Learn major NoSQL categories:
-
-| Category | Model | Typical use cases |
-| --- | --- | --- |
-| Key-value | key → value | caching, sessions, counters |
-| Document | JSON-like documents | flexible domain objects, content |
-| Wide-column | partitioned sparse rows | very large distributed datasets |
-| Graph | nodes and edges | relationship-heavy queries |
-| Time-series | timestamp-oriented records | metrics, telemetry, IoT |
-
-Typical technologies include Redis, MongoDB, Cassandra, DynamoDB, Neo4j, and specialized time-series databases.
-
-The important skill is deciding based on access patterns, consistency requirements, scale, operational complexity, and data relationships.
-
-### 1.6 Caching
+## 1.4 WAL, recovery, and durability — SHOULD
 
 Learn:
 
-- local/in-process cache
-- distributed cache
+- write-ahead logging
+- checkpoints
+- crash recovery
+- redo/undo concepts
+- fsync/durability trade-offs
+- backup vs replication
+- point-in-time recovery
+
+A replica is not automatically a backup.
+
+## 1.5 Caching — MUST
+
+Learn:
+
 - browser/client cache
 - CDN cache
-- database/query cache concepts
-
-Common patterns:
-
+- reverse-proxy cache
+- in-process cache
+- distributed cache
+- Redis
 - cache-aside
 - read-through
 - write-through
 - write-behind
 
-Important problems:
+Failure modes:
 
-- cache invalidation
 - stale data
+- cache invalidation
 - cache stampede
 - cache penetration
 - hot keys
-- eviction policies
-- TTL selection
+- eviction
+- TTL mistakes
+- cache outage
 
-Typical technology:
+The question is not “Where can Redis be added?” but “Which latency/load problem justifies another copy of state?”
 
-- Redis
-
-### 1.7 Replication
-
-Replication creates copies of data on multiple nodes.
+## 1.6 Replication — MUST
 
 Learn:
 
-- leader/follower replication
-- multi-leader replication conceptually
-- leaderless replication conceptually
+- leader/follower
 - synchronous vs asynchronous replication
 - read replicas
 - replication lag
 - failover
+- multi-leader conceptually
+- leaderless conceptually
+- stale reads
+- read-your-writes implications
 
-Replication can improve availability and read scalability, but it creates consistency and operational trade-offs.
+Replication creates copies. It does not partition a logical dataset.
 
-### 1.8 Partitioning and sharding
-
-Partitioning divides a dataset into smaller pieces.
+## 1.7 Partitioning and sharding — MUST
 
 Learn:
 
-- horizontal partitioning
-- vertical partitioning
-- range-based sharding
-- hash-based sharding
+- horizontal vs vertical partitioning
+- range sharding
+- hash sharding
 - directory-based sharding
-- consistent hashing conceptually
-- shard key selection
+- shard keys
 - hot partitions
-- rebalancing
-- cross-shard queries
+- cross-shard reads
 - cross-shard transactions
+- rebalancing
+- resharding
 
-A bad shard key can make a theoretically scalable system perform poorly.
+### Consistent hashing — SHOULD
 
-### 1.9 Data modeling for access patterns
+Understand:
 
-In system design, start from questions such as:
+- why `hash(key) % N` causes large remapping when `N` changes
+- hash rings
+- node placement
+- virtual nodes
+- skew
+- partition movement
 
-- What are the most common reads?
-- What are the most common writes?
-- Which queries need low latency?
-- Which fields must be unique?
-- Which data must be strongly consistent?
-- Which data can be eventually consistent?
-- What data grows fastest?
+## 1.8 SQL vs NoSQL — MUST
 
-Design storage around actual access patterns, not only around entity diagrams.
+Know the major models:
 
-### Layer 1 exit criteria
+| Model | Typical strengths |
+| --- | --- |
+| Relational | constraints, joins, transactions, structured data |
+| Key-value | simple low-latency access, cache/session/counters |
+| Document | nested aggregate-shaped data, flexible document models |
+| Wide-column | very large partitioned datasets |
+| Graph | relationship-heavy traversals |
+| Time-series | timestamp-oriented telemetry/metrics |
 
-Before moving on, you should be able to explain:
+Choose from **invariants + access patterns + scale + consistency + operational capability**, not fashion.
 
-- why an index can improve reads but hurt writes
-- when a transaction is necessary
-- SQL vs NoSQL trade-offs
-- cache-aside and cache invalidation
-- replication vs sharding
-- how to choose a primary key and a shard key
-- how data consistency requirements affect storage design
+## 1.9 Distributed SQL — SHOULD
 
-## Layer 2: Application and code
+Use systems such as CockroachDB conceptually to learn:
 
-This layer answers: **how does a single application receive work, execute business logic, and access data?**
+- distributed transactions
+- consensus-backed replication
+- locality
+- distributed query execution
+- serializable transactions
+- multi-region latency trade-offs
 
-### 2.1 Application structure
+Distributed SQL does not remove network latency.
 
-A common backend structure is:
+## 1.10 Distributed ID generation — SHOULD
 
-```text
-Client
-  ↓
-Controller / API layer
-  ↓
-Service / business layer
-  ↓
-Repository / data-access layer
-  ↓
-Database
-```
-
-Learn the responsibilities of:
-
-- controllers
-- services
-- repositories/DAOs
-- domain models
-- DTOs
-- validators
-- mappers
-
-The exact architecture may differ, but separation of concerns remains important.
-
-### 2.2 Dependency injection and inversion of control
-
-For Java/Spring developers, understand:
-
-- dependency injection
-- inversion of control
-- bean lifecycle at a useful level
-- constructor injection
-- interface-based abstractions
-
-These are not distributed-system concepts, but they affect how maintainable services are built.
-
-### 2.3 Request lifecycle
-
-Understand what happens after an HTTP request reaches your backend:
+Compare:
 
 ```text
-Socket accepted
-    ↓
-Web server / application server
-    ↓
-Filter / middleware
-    ↓
-Authentication / authorization
-    ↓
-Routing
-    ↓
-Controller
-    ↓
-Business logic
-    ↓
-Database / cache / external service
-    ↓
-Response serialization
-    ↓
-HTTP response
+database sequence
+→ UUID
+→ time-sortable UUID/ID
+→ Snowflake-style ID
+→ range allocation
 ```
 
-### 2.4 Processes, threads, and concurrency
+Understand:
+
+- uniqueness
+- ordering semantics
+- worker identity
+- sequence exhaustion
+- clock rollback
+- collision risk
+- information leakage
+
+## 1.11 Search engines — SHOULD
+
+Learn:
+
+- inverted indexes
+- analyzers/tokenization
+- postings
+- filters vs scoring
+- BM25 conceptually
+- refresh intervals
+- segments
+- replication
+- reindexing
+- search consistency/freshness
+
+Use Elasticsearch/OpenSearch/Lucene as learning examples.
+
+A search engine is usually **not** the primary transactional source of truth.
+
+## 1.12 Object storage — MUST
+
+Learn:
+
+- block vs file vs object storage
+- S3-style object storage
+- metadata vs binary data
+- multipart/chunked upload
+- signed/pre-signed URLs
+- CDN integration
+- lifecycle rules
+- versioning
+- replication
+- cold/archive storage
+
+## 1.13 OLTP vs OLAP — SHOULD
+
+Understand:
+
+- transactional workloads vs analytical workloads
+- read/write patterns
+- row-oriented vs column-oriented concepts
+- denormalization for analytics
+- workload isolation
+- CDC/ETL/ELT relationships
+- data warehouse/lake concepts
+
+## Layer 1 hands-on
+
+- Create several million synthetic order rows.
+- Benchmark slow queries before/after index changes.
+- Reproduce transaction anomalies with concurrent sessions.
+- Configure or simulate replication lag.
+- Implement a basic shard router.
+- Implement a Snowflake-style ID generator.
+- Index a catalog into Elasticsearch/OpenSearch.
+- Upload large files using object storage + signed URLs.
+
+## Layer 1 exit criteria
+
+You can explain:
+
+- why an index helps one workload and hurts another
+- how isolation prevents or permits anomalies
+- WAL vs replication vs backup
+- replication vs partitioning
+- cache invalidation and stampedes
+- how to select a shard key
+- SQL vs NoSQL from access patterns
+- why search indexes are separate from transactional state
+- when globally distributed SQL is worth its latency/complexity
+
+---
+
+# Layer 2 — Application runtime and code
+
+**Primary question:** How does one process receive work, execute it concurrently, and interact with external resources?
+
+**Difficulty:** intermediate
+
+## 2.1 Backend request lifecycle — MUST
+
+Understand:
+
+```text
+socket accepted
+    ↓
+web/application server
+    ↓
+middleware/filter
+    ↓
+authentication/authorization
+    ↓
+routing
+    ↓
+controller
+    ↓
+business logic
+    ↓
+database/cache/external service
+    ↓
+serialization
+    ↓
+response
+```
+
+## 2.2 Process, thread, concurrency, and parallelism — MUST
 
 Learn:
 
 - process vs thread
-- thread lifecycle
+- concurrency vs parallelism
 - race conditions
 - critical sections
-- mutex/lock concepts
-- semaphores
+- mutex/lock
+- semaphore
 - atomic operations
-- thread pools
 - context switching
 - CPU-bound vs I/O-bound work
 
-For Java, study:
+For Java, understand:
 
 - `Thread`
 - `Runnable`
@@ -368,269 +481,269 @@ For Java, study:
 - `CompletableFuture`
 - concurrent collections
 - synchronization primitives
+- virtual threads conceptually
 
-### 2.5 Synchronous vs asynchronous execution
+## 2.3 Sync/async vs blocking/non-blocking — MUST
 
-**Synchronous** usually means the caller waits for an operation to complete before continuing.
-
-```text
-Caller
-  ↓
-Service A
-  ↓
-Service B
-  ↓
-Result
-  ↓
-Caller continues
-```
-
-**Asynchronous** execution allows work to continue independently.
-
-```text
-Caller
-  ↓
-Service A
-  ↓
-Queue
-  ↓
-Worker
-```
-
-The caller may receive an acknowledgement before the worker completes the job.
-
-Do not confuse these terms with blocking/non-blocking. They are related but describe different aspects of execution and coordination.
-
-### 2.6 Blocking vs non-blocking I/O
-
-Learn the difference between:
-
-- blocking calls
-- non-blocking calls
-- event loops
-- reactive/event-driven I/O
-
-Understand why a server handling thousands of mostly waiting I/O operations may benefit from non-blocking approaches, while simple blocking code can remain the better engineering choice for many applications.
-
-### 2.7 Application-level transactions
+These dimensions are related but different.
 
 Learn:
 
-- transaction boundaries
-- connection pools
-- database transaction propagation concepts
+- synchronous coordination
+- asynchronous work
+- blocking I/O
+- non-blocking I/O
+- event loops
+- reactive/event-driven I/O
+- callback/future/promise models
+
+Do not assume non-blocking code is always a better engineering choice.
+
+## 2.4 Thread pools and connection pools — MUST
+
+Learn:
+
+- pool sizing
+- queue behavior
+- saturation
+- rejection
+- connection acquisition time
+- database max connections
+- head-of-line blocking
+- pool starvation
+
+More threads or database connections can make the system slower.
+
+## 2.5 Application structure — MUST
+
+Understand:
+
+- controller/API layer
+- service/application layer
+- domain logic
+- repository/DAO
+- DTOs
+- validation
+- mapping
+- dependency injection
+- inversion of control
+
+This is not yet “architecture”; it is the local structure of one application.
+
+## 2.6 Transaction boundaries — MUST
+
+Learn:
+
+- where transactions begin/end
+- connection usage inside transactions
 - rollback behavior
-- why holding transactions open during slow network calls is dangerous
+- transaction propagation conceptually
+- why slow remote calls inside DB transactions are dangerous
+- optimistic concurrency
 
-For Java/Spring, understand what `@Transactional` does conceptually and where transaction boundaries should live.
+For Java/Spring, understand `@Transactional` conceptually rather than treating it as magic.
 
-### 2.8 Background jobs
+## 2.7 Background jobs — MUST
 
-Typical background work includes:
+Examples:
 
-- email sending
-- image processing
+- email
+- image/video processing
 - report generation
-- data imports
-- scheduled cleanup
-- notification delivery
+- imports
+- cleanup
+- notifications
 
-Learn when work belongs inside the request path and when it should be delegated to background processing.
+Understand when work should leave the request path.
 
-### 2.9 Idempotency at application level
+## 2.8 Idempotency — MUST
 
-An operation is idempotent when repeating the same logical request does not create unintended additional effects.
+Important for:
 
-Important use cases:
-
-- payment requests
+- payments
 - order creation
-- webhook processing
-- message consumers
+- webhooks
 - retries
+- message consumers
 
-Common strategies:
+Techniques:
 
 - idempotency keys
 - unique constraints
 - processed-message tables
-- compare-and-set/version checks
+- compare-and-set/versioning
+- persisted previous result
 
-### Layer 2 exit criteria
+## Layer 2 hands-on
 
-You should be able to explain:
+- Compare blocking and non-blocking handling under I/O-heavy load.
+- Saturate a thread pool and observe queue/latency behavior.
+- Saturate a DB connection pool.
+- Implement background report generation.
+- Simulate a client timeout after server commit and prove retry safety.
 
-- the lifecycle of a backend request
-- threads and thread pools
-- sync vs async
-- blocking vs non-blocking
-- where transaction boundaries belong
-- why idempotency matters
-- when work should become a background job
+## Layer 2 exit criteria
 
-## Layer 3: Communication and networking
+You can explain:
 
-This layer answers: **how do clients, servers, and services exchange data?**
+- sync vs async vs blocking vs non-blocking
+- thread pool and connection pool saturation
+- CPU-bound vs I/O-bound work
+- request lifecycle
+- transaction boundaries
+- idempotency
+- when to move work to a background job
 
-### 3.1 Networking fundamentals
+---
 
-Learn enough networking to reason about latency and failure.
+# Layer 3 — Networking and communication
 
-Topics:
+**Primary question:** How do machines and clients exchange requests, responses, and long-lived streams?
 
-- IP addresses
-- ports
-- TCP
-- UDP conceptually
-- connection establishment
-- sockets
-- DNS
-- TLS
-- HTTP
-- proxies
-- timeouts
+**Difficulty:** intermediate
 
-You do not need to become a network engineer, but you should understand what happens between a client and server.
-
-### 3.2 DNS
-
-Learn the basic resolution flow:
-
-```text
-User enters domain
-      ↓
-DNS resolver
-      ↓
-Authoritative DNS
-      ↓
-IP address
-      ↓
-Client connects to server/load balancer
-```
-
-Understand:
-
-- A/AAAA records
-- CNAME conceptually
-- TTL
-- DNS caching
-- why DNS changes are not always immediate
-
-### 3.3 HTTP fundamentals
+## 3.1 Networking fundamentals — MUST
 
 Learn:
 
-- methods: GET, POST, PUT, PATCH, DELETE
+- IP addresses
+- ports
+- sockets
+- TCP
+- UDP conceptually
+- connection establishment
+- packet loss conceptually
+- DNS
+- TLS
+- proxies
+- timeouts
+
+You do not need to become a network engineer, but you must know where latency and failure can appear.
+
+## 3.2 DNS — MUST
+
+Learn:
+
+- resolver flow
+- authoritative DNS
+- A/AAAA
+- CNAME
+- TTL
+- caching
+- propagation behavior
+- basic failover/routing implications
+
+## 3.3 TLS — MUST
+
+Learn conceptually:
+
+- HTTPS
+- certificates
+- certificate chain
+- handshake
+- TLS termination
+- mTLS conceptually
+- encryption in transit
+
+## 3.4 HTTP semantics — MUST
+
+Learn:
+
+- GET/POST/PUT/PATCH/DELETE
+- safe vs unsafe methods
+- idempotent methods
 - status codes
 - headers
-- request/response bodies
 - cookies
-- keep-alive
-- HTTP/1.1 vs HTTP/2 vs HTTP/3 at a conceptual level
-- TLS/HTTPS
+- compression
+- content negotiation
+- connection reuse
+- caching semantics
+- ETag / validators
+- `Cache-Control`
 
-### 3.4 REST
+## 3.5 HTTP/1.1, HTTP/2, HTTP/3 and QUIC — SHOULD
 
-REST is an architectural style commonly used for request/response APIs over HTTP.
+Understand conceptually:
+
+- persistent connections
+- multiplexing
+- header compression
+- TCP head-of-line effects
+- HTTP/3 over QUIC
+- transport implications
+
+Do not memorize protocol frames for ordinary system-design interviews.
+
+## 3.6 REST — MUST
 
 Study:
 
 - resources
-- resource identifiers
+- URI design
 - HTTP semantics
-- stateless requests
-- idempotent methods
+- statelessness
 - pagination
-- filtering
-- sorting
+- cursor pagination
+- filtering/sorting
 - versioning
-- error design
+- errors
+- auth boundaries
+- idempotency
+- rate limits
 
-REST is usually a strong default for conventional CRUD and request/response APIs.
-
-### 3.5 WebSocket
-
-WebSocket creates a persistent, full-duplex connection between client and server.
+## 3.7 WebSocket — MUST
 
 Useful for:
 
 - chat
-- multiplayer games
+- multiplayer
 - live collaboration
-- trading dashboards
-- presence systems
-- real-time notifications where low-latency bidirectional communication matters
+- trading/live dashboards
+- presence
 
-Trade-offs:
+Learn:
 
-- connection state must be managed
-- scaling requires connection-aware infrastructure
-- load balancing becomes more involved
-- reconnect and heartbeat behavior must be designed
+- full-duplex communication
+- persistent connections
+- heartbeat
+- reconnect
+- connection routing
+- backpressure
+- connection-aware load balancing
 
-### 3.6 REST vs WebSocket
+## 3.8 Server-Sent Events — SHOULD
 
-| Question | REST/HTTP | WebSocket |
-| --- | --- | --- |
-| Communication | Request/response | Full duplex |
-| Connection | Usually independent HTTP requests over reusable connections | Long-lived logical connection |
-| Server push | Limited; often polling/SSE/webhooks | Native bidirectional messaging |
-| CRUD APIs | Excellent fit | Usually unnecessary |
-| Real-time chat | Possible but awkward with polling | Strong fit |
-| Infrastructure complexity | Lower | Higher |
-| Stateless scaling | Easier | More connection-aware |
+Use when communication is mostly:
 
-The system-design question is not "Which is better?" It is "Which communication model matches the product requirements?"
-
-### 3.7 Server-Sent Events
-
-SSE provides a long-lived HTTP connection through which the server sends events to the client.
-
-Useful when:
-
-- communication is mainly server → client
-- browser support is sufficient
-- you want something simpler than bidirectional WebSocket communication
+```text
+server → client
+```
 
 Examples:
 
+- progress
 - live feeds
-- job progress updates
 - notifications
 
-### 3.8 Polling and long polling
+## 3.9 Polling and long polling — MUST
 
-**Polling:** client asks the server repeatedly for updates.
+Understand their simplicity and their request/connection overhead.
 
-```text
-Client → Any update?
-Client ← No
-Client → Any update?
-Client ← No
-Client → Any update?
-Client ← Yes
-```
+## 3.10 gRPC — SHOULD
 
-**Long polling:** the server holds the request until data becomes available or a timeout is reached.
-
-Understand their simplicity and their extra request/connection overhead.
-
-### 3.9 gRPC
-
-gRPC is commonly used for efficient service-to-service communication.
-
-Learn conceptually:
+Learn:
 
 - Protocol Buffers
 - strongly defined contracts
 - binary serialization
 - unary calls
-- streaming
-- internal service communication
+- client/server/bidirectional streaming
+- service-to-service use cases
 
-Compare REST and gRPC based on interoperability, browser/client requirements, operational tooling, contracts, and performance needs.
+Compare REST and gRPC by ecosystem, contracts, browser/client needs, performance, and observability.
 
-### 3.10 GraphQL
+## 3.11 GraphQL — SHOULD
 
 Learn:
 
@@ -638,81 +751,253 @@ Learn:
 - queries
 - mutations
 - resolvers
-- client-selected fields
-- over-fetching/under-fetching trade-offs
-- N+1 query problems
+- N+1 problem
+- batching
 - caching complexity
+- authorization complexity
+- over-fetching/under-fetching trade-offs
 
-Use it when its flexibility solves a real client/API problem, not merely because it is fashionable.
+## 3.12 Webhooks — MUST
 
-### 3.11 Webhooks
+Learn:
 
-Webhooks are HTTP callbacks triggered by events.
-
-Important concerns:
-
-- signature verification
+- callback delivery
+- signatures
 - retries
+- timeout
 - duplicate delivery
-- idempotency
 - ordering
-- timeout handling
+- idempotency
 
-### 3.12 Timeouts and retries
-
-Every remote call can fail or become slow.
+## 3.13 Timeouts, deadlines, retries, and jitter — MUST
 
 Learn:
 
 - connection timeout
 - read/request timeout
-- retry policies
+- end-to-end deadlines
 - exponential backoff
 - jitter
-- retryable vs non-retryable failures
-- retry storms
+- retryable vs non-retryable errors
+- retry amplification
+- retry budgets conceptually
 
-Retries without careful design can multiply load during an incident.
+Retries are a source of load, not free reliability.
 
-### Layer 3 exit criteria
+## Layer 3 hands-on
 
-You should be able to choose among:
+- Trace DNS → TLS → HTTP using command-line tools.
+- Run HTTP/1.1 vs HTTP/2 experiments.
+- Build REST + WebSocket/SSE in the same application.
+- Implement webhook delivery with signatures, retries, and deduplication.
+- Inject slow upstream responses and measure retry amplification.
 
-- REST
-- WebSocket
-- SSE
-- polling
-- gRPC
-- GraphQL
-- webhooks
+## Layer 3 exit criteria
 
-and explain the trade-offs of each choice.
+You can choose and defend:
 
-## Layer 4: Messaging and integration
+- REST vs gRPC
+- REST vs WebSocket
+- WebSocket vs SSE
+- polling vs push
+- webhook vs polling
+- HTTP caching behavior
+- safe timeout/retry behavior
 
-This layer answers: **how can components communicate without requiring the receiver to complete work immediately?**
+---
 
-### 4.1 Message queues
+# Layer 4 — Codebase architecture
 
-A queue separates producers from consumers.
+**Primary question:** How should business complexity be separated before adding network boundaries?
+
+**Difficulty:** intermediate → advanced
+
+A critical rule:
+
+> Do not learn microservices before learning to create strong boundaries inside one process.
+
+## 4.1 Traditional monolith — MUST
+
+Understand:
+
+- one deployable/runtime
+- simple local calls
+- simple transactions
+- low operational overhead
+- risks of uncontrolled coupling
+
+A monolith is not automatically bad architecture.
+
+## 4.2 Modular monolith — MUST
+
+Learn:
+
+- explicit modules
+- public module APIs
+- internal implementation boundaries
+- dependency rules
+- module-level tests
+- event-based communication inside one process when useful
+- module-owned persistence abstractions
+
+Example domains:
 
 ```text
-Producer
-   ↓
- Queue
-   ↓
-Consumer
+Identity
+Catalog
+Ordering
+Inventory
+Billing
+Fulfillment
+Reporting
 ```
 
-Benefits can include:
+## 4.3 Dependency direction — MUST
 
-- asynchronous processing
-- load smoothing
-- failure isolation
-- buffering
-- independent scaling of producers and consumers
+Learn:
 
-### 4.2 Producer and consumer
+- dependency inversion
+- stable boundaries
+- framework vs business-policy dependencies
+- infrastructure as an implementation detail
+
+## 4.4 Hexagonal Architecture — SHOULD
+
+Learn:
+
+- ports
+- adapters
+- application core
+- inbound adapters
+- outbound adapters
+- testability
+
+Use it when it clarifies dependencies; avoid ceremony for its own sake.
+
+## 4.5 Clean Architecture — SHOULD
+
+Learn:
+
+- dependency direction
+- domain/business rules
+- application use cases
+- interface adapters
+- frameworks/drivers
+
+Compare principles, not folder names.
+
+## 4.6 Domain-Driven Design — SHOULD
+
+Learn:
+
+- domain model
+- ubiquitous language
+- aggregate
+- entity/value object
+- domain service
+- bounded context
+- context map
+
+The strategic value is identifying **where a model applies**.
+
+## 4.7 Boundaries and data ownership — MUST
+
+Use this progression:
+
+```text
+domain boundary
+    ↓
+module boundary
+    ↓
+data ownership boundary
+    ↓
+team boundary
+    ↓
+deployment/service boundary only when justified
+```
+
+A bounded context is not automatically a microservice.
+
+## 4.8 Multi-tenancy — SHOULD
+
+Treat tenancy as a boundary problem.
+
+Compare:
+
+- shared DB/shared schema
+- shared DB/separate schema
+- database per tenant
+- dedicated infrastructure
+
+Consider:
+
+- tenant identity
+- authorization
+- noisy neighbors
+- quotas
+- connection pools
+- backup/restore
+- migrations
+- encryption
+- placement
+- cost attribution
+
+## 4.9 Architecture fitness and tests — SHOULD
+
+Learn:
+
+- architecture tests
+- module/component tests
+- dependency rules
+- contract tests
+- migration tests
+- fitness functions conceptually
+
+If a boundary cannot be enforced or tested, it is likely to decay.
+
+## Layer 4 hands-on
+
+- Refactor a layered monolith into explicit domain modules.
+- Prevent one module from importing another module’s internals.
+- Convert one domain to ports/adapters.
+- Add architecture tests.
+- Implement shared-schema tenancy, then design a stronger-isolation alternative.
+
+## Layer 4 exit criteria
+
+You can explain:
+
+- monolith vs modular monolith
+- Clean vs Hexagonal at the principle level
+- DDD bounded contexts
+- why domain boundary ≠ service boundary
+- data ownership
+- multi-tenancy isolation choices
+- how to enforce module boundaries
+
+---
+
+# Layer 5 — Messaging and integration
+
+**Primary question:** How do independent components coordinate when immediate synchronous completion is not required?
+
+**Difficulty:** advanced
+
+## 5.1 Queue vs stream — MUST
+
+A useful distinction:
+
+```text
+Task queue:
+"Please process this work."
+
+Event stream/log:
+"This event happened."
+```
+
+They overlap, but optimize for different semantics.
+
+## 5.2 Messaging fundamentals — MUST
 
 Learn:
 
@@ -724,40 +1009,12 @@ Learn:
 - offset
 - acknowledgement
 - consumer group
-
-Exact meanings differ by product, so learn the concepts first and then the implementation details.
-
-### 4.3 Kafka
-
-Kafka is commonly used as a distributed event-streaming platform.
-
-Learn:
-
-- topics
-- partitions
-- offsets
-- brokers
-- producers
-- consumers
-- consumer groups
+- routing
 - retention
-- partition ordering
-- replication
 
-Common use cases:
+## 5.3 RabbitMQ / task-oriented messaging — MUST
 
-- event streaming
-- event-driven integration
-- activity pipelines
-- log/event collection
-- change propagation
-- asynchronous workflows
-
-### 4.4 RabbitMQ
-
-RabbitMQ is a message broker commonly used for queue-based messaging.
-
-Learn:
+Learn conceptually:
 
 - exchanges
 - queues
@@ -765,232 +1022,289 @@ Learn:
 - routing keys
 - acknowledgements
 - prefetch
+- retry
 - dead-letter exchanges/queues
 
-It is often a good fit for task queues and routing-oriented messaging patterns.
+## 5.4 Kafka / durable event streams — MUST
 
-### 4.5 Kafka vs RabbitMQ
+Learn:
 
-Avoid reducing the comparison to "Kafka is faster" or "RabbitMQ is simpler."
+- broker
+- topic
+- partition
+- producer
+- consumer
+- consumer group
+- offset
+- retention
+- replication
+- partition ordering
+- replay
+- consumer lag
 
-Compare them by:
+Do not reduce Kafka vs RabbitMQ to “fast vs simple.”
 
-- retention model
-- consumption model
-- replay requirements
-- ordering requirements
-- routing needs
-- throughput
-- operational complexity
-- event-stream vs task-queue semantics
+## 5.5 Delivery semantics — MUST
 
-### 4.6 Publish/subscribe
-
-In pub/sub, one event may be consumed by multiple independent subscribers.
-
-```text
-              ┌→ Email service
-Order event ──┼→ Analytics service
-              └→ Inventory service
-```
-
-This reduces direct coupling but increases the need for observability, schema governance, idempotency, and failure handling.
-
-### 4.7 Delivery semantics
-
-Understand the practical meaning of:
+Understand:
 
 - at-most-once
 - at-least-once
-- effectively-once processing
+- effectively-once effects
 
-"Exactly once" should always be examined carefully because guarantees depend on the boundaries of the system and the technologies involved.
+Treat “exactly once” as a scoped guarantee. Ask exactly once **where**.
 
-### 4.8 Ordering
+## 5.6 Ordering — MUST
 
 Ask:
 
-- Is global ordering required?
-- Is per-user or per-order ordering enough?
-- Can events be processed out of order?
+- global order?
+- per partition?
+- per user?
+- per order?
+- can consumers reorder?
 
 Global ordering is expensive and often unnecessary.
 
-### 4.9 Retry and dead-letter queues
+## 5.7 Retry, poison messages, and DLQ — MUST
 
-Typical flow:
+A DLQ is not the end of a design.
 
-```text
-Main queue
-   ↓
-Consumer fails
-   ↓
-Retry with backoff
-   ↓
-Fails repeatedly
-   ↓
-Dead-letter queue
-```
+Also define:
 
-A DLQ is not a complete solution. You still need monitoring, investigation, replay/recovery procedures, and idempotent processing.
+- monitoring
+- investigation
+- replay
+- manual repair
+- idempotent processing
+- retention
 
-### 4.10 Event-driven architecture
+## 5.8 Event-driven architecture — MUST
 
-An event represents something that happened:
+Learn:
 
-- `OrderCreated`
-- `PaymentCompleted`
-- `UserRegistered`
+- command vs event vs query
+- temporal decoupling
+- fan-out
+- consumer independence
+- eventual consistency
+- replay
+- observability challenges
 
-Producers publish facts; consumers react to them.
+## 5.9 Transactional Outbox — MUST
 
-Learn the difference between:
-
-- commands
-- events
-- queries
-
-### 4.11 Outbox pattern
-
-A classic problem:
-
-1. application writes an order to the database
-2. application publishes `OrderCreated`
-3. the database commit succeeds but message publishing fails
-
-Now the system state and event stream disagree.
-
-The transactional outbox pattern stores the event in the same database transaction as the business change, then publishes it asynchronously.
-
-### 4.12 Saga pattern
-
-A distributed business transaction may span multiple services.
-
-Example:
+Classic dual-write problem:
 
 ```text
-Create order
-   ↓
-Reserve inventory
-   ↓
-Charge payment
-   ↓
-Create shipment
+write business state
++
+publish event
 ```
 
-If shipping fails, the system may need compensating actions rather than one global ACID transaction.
+If only one succeeds, state diverges.
+
+Transactional outbox:
+
+```text
+business row + outbox row
+        same DB transaction
+                ↓
+        asynchronous publisher/CDC
+                ↓
+             stream
+```
+
+## 5.10 Change Data Capture — SHOULD
+
+Learn:
+
+- log-based CDC
+- database change logs
+- Debezium conceptually
+- source-of-truth implications
+- ordering
+- snapshot/bootstrap
+- schema changes
+- replay/recovery
+
+## 5.11 Event schema evolution — SHOULD
+
+Learn:
+
+- backward compatibility
+- forward compatibility
+- full compatibility
+- additive changes
+- breaking changes
+- defaults
+- versioning
+- semantic compatibility
+- Avro/Protobuf/schema registry concepts
+
+Transport compatibility does not guarantee business-semantic compatibility.
+
+## 5.12 Saga and workflows — MUST
 
 Learn:
 
 - choreography
 - orchestration
-- compensating transactions
+- compensating actions
+- retries
+- timeouts
+- reconciliation
+- workflow state
 
-### Layer 4 exit criteria
-
-You should understand:
-
-- queues and pub/sub
-- Kafka and RabbitMQ at a conceptual level
-- retries and DLQs
-- duplicate messages
-- ordering
-- idempotent consumers
-- outbox pattern
-- saga pattern
-
-## Layer 5: Server and infrastructure
-
-This layer answers: **how does the application run, receive traffic, and scale operationally?**
-
-### 5.1 Operating-system fundamentals
-
-For backend engineers, learn useful Linux concepts:
-
-- process management
-- file permissions
-- environment variables
-- sockets and ports
-- memory and CPU usage
-- disk usage
-- signals
-- logs
-- basic shell commands
-
-### 5.2 Web server and reverse proxy
-
-Typical request path:
+Example:
 
 ```text
-Internet
-   ↓
-Reverse proxy / load balancer
-   ↓
-Application server
+Create order
+    ↓
+Reserve inventory
+    ↓
+Charge payment
+    ↓
+Create shipment
 ```
 
-Nginx can commonly provide:
+## 5.13 CQRS — SHOULD
 
-- reverse proxying
-- TLS termination
-- static-file serving
-- compression
-- routing
-- rate limiting
-- caching in some architectures
-
-### 5.3 Load balancing
-
-Load balancing distributes traffic across multiple instances.
-
-```text
-             Load balancer
-            /      |      \
-         App 1   App 2   App 3
-```
+Separate command/write concerns from query/read concerns when the workload justifies different models.
 
 Learn:
 
-- Layer 4 vs Layer 7 load balancing conceptually
+- command model
+- read model
+- projection
+- eventual consistency
+- rebuildability
+
+CQRS is not the same thing as event sourcing.
+
+## 5.14 Event Sourcing — ADVANCED
+
+Learn:
+
+- event log as source of truth
+- aggregate reconstruction
+- snapshots
+- projection rebuild
+- event correction
+- event versioning
+- debugging/audit benefits
+- operational complexity
+
+Do not adopt it without a concrete business reason.
+
+## 5.15 Stream processing — ADVANCED
+
+Learn:
+
+- event time
+- processing time
+- windows
+- watermarks
+- state
+- joins
+- checkpoints
+- late/out-of-order events
+- exactly-once state semantics
+
+Use Flink/Kafka Streams conceptually or experimentally.
+
+## Layer 5 hands-on
+
+- Build the same async workflow once with RabbitMQ and once with Kafka concepts.
+- Crash consumers after receiving but before persisting results.
+- Prove duplicate delivery does not corrupt state.
+- Implement Outbox → CDC → Kafka.
+- Evolve an Avro/Protobuf event across old/new producers and consumers.
+- Build a CQRS projection and delete/rebuild it.
+- Prototype event sourcing only for one small domain.
+
+## Layer 5 exit criteria
+
+You can explain:
+
+- queue vs durable stream
+- Kafka vs RabbitMQ by semantics
+- delivery and ordering guarantees
+- duplicate handling
+- retry/DLQ recovery
+- outbox/CDC
+- schema evolution
+- saga
+- CQRS vs event sourcing
+- when stream processing is justified
+
+---
+
+# Layer 6 — Infrastructure and platform
+
+**Primary question:** How is the system packaged, deployed, scaled, observed, rolled back, secured, and paid for?
+
+**Difficulty:** advanced
+
+## 6.1 Linux/runtime operations — MUST
+
+Learn:
+
+- processes
+- signals
+- file permissions
+- environment variables
+- sockets/ports
+- CPU/memory
+- disk
+- file descriptors conceptually
+- logs
+- shell/network tools
+
+## 6.2 Reverse proxy and load balancing — MUST
+
+Learn:
+
+- reverse proxy
+- L4 vs L7
 - round robin
 - least connections
 - weighted routing
 - health checks
 - sticky sessions
 - connection draining
+- TLS termination
 
-### 5.4 Horizontal vs vertical scaling
+Examples:
 
-**Vertical scaling:** make one machine larger.
+- NGINX
+- HAProxy
+- cloud load balancers
 
-**Horizontal scaling:** add more machines/instances.
+## 6.3 Vertical vs horizontal scaling — MUST
 
-Understand the advantages and limits of each approach.
+Understand limits and trade-offs of both.
 
-### 5.5 Stateless application servers
+## 6.4 Stateless application servers — MUST
 
-Stateless services are easier to scale horizontally because any healthy instance can handle a request.
+Externalize shared state when multiple instances must serve interchangeable traffic.
 
-Move shared state such as sessions to appropriate external storage when necessary.
+## 6.5 Docker — MUST
 
-### 5.6 Containers
-
-Learn Docker concepts:
+Learn:
 
 - image
 - container
 - Dockerfile
 - layers
 - volumes
-- networks
-- environment variables
-- container registry
+- network
+- registry
+- configuration
+- image security basics
 
-Understand the difference between packaging an application and orchestrating many application instances.
+## 6.6 Kubernetes — SHOULD
 
-### 5.7 Container orchestration
-
-Learn Kubernetes conceptually after Docker:
+Learn:
 
 - Pod
 - Deployment
@@ -998,1139 +1312,1513 @@ Learn Kubernetes conceptually after Docker:
 - Ingress/Gateway concepts
 - ConfigMap
 - Secret
-- liveness/readiness probes
-- autoscaling
+- readiness/liveness/startup probes
 - rolling deployments
+- autoscaling
+- requests/limits conceptually
 
-You do not need deep Kubernetes expertise to learn system design, but you should understand why orchestration exists.
+Understand why readiness and liveness are different.
 
-### 5.8 CDN
-
-A CDN serves content from geographically distributed edge locations.
-
-Useful for:
-
-- static assets
-- images
-- videos
-- downloads
-- cacheable API/content responses in suitable cases
-
-Benefits include lower latency and reduced origin load.
-
-### 5.9 Object storage
-
-Do not store large binary objects in the application server's local filesystem if multiple stateless instances must access them.
-
-Learn object-storage concepts for:
-
-- images
-- videos
-- backups
-- documents
-- large generated files
-
-Typical technology example: Amazon S3-compatible object storage.
-
-### 5.10 Deployment strategies
+## 6.7 Infrastructure as Code — SHOULD
 
 Learn:
 
-- rolling deployment
-- blue/green deployment
-- canary deployment
+- Terraform or equivalent
+- desired state
+- plan/apply
+- state
+- modules
+- environment separation
+- drift
+- secrets/state risks
+- reviewable infrastructure changes
+
+## 6.8 CI — MUST
+
+A useful pipeline:
+
+```text
+format/lint
+→ unit tests
+→ module/integration tests
+→ contract tests
+→ migration validation
+→ security/dependency scan
+→ image build
+→ artifact publish
+```
+
+CI is a feedback system, not a YAML collection.
+
+## 6.9 Continuous delivery/deployment — SHOULD
+
+Learn:
+
+- build once/promote artifact
+- environment promotion
+- release gates
 - rollback
-- feature flags
+- automated verification
+- database compatibility
 
-### 5.11 Autoscaling
+## 6.10 Database deployment compatibility — MUST
 
-Possible signals:
+Learn:
+
+```text
+expand
+→ migrate/backfill
+→ switch
+→ contract
+```
+
+Rolling/canary deployments may run old and new code at the same time.
+
+A code rollback cannot undo destructive data/schema changes automatically.
+
+## 6.11 Deployment strategies — MUST
+
+Compare:
+
+| Strategy | Key property |
+| --- | --- |
+| Rolling | gradual replacement; mixed versions |
+| Blue/green | two environments; fast traffic switch |
+| Canary | limited exposure before wider rollout |
+| Feature flag | deploy code separately from activation |
+
+## 6.12 Autoscaling — MUST
+
+Signals may include:
 
 - CPU
 - memory
-- requests per second
+- RPS
+- latency
 - queue depth
-- custom application metrics
+- custom business metrics
 
-Scaling based on the wrong metric can make incidents worse.
+Wrong autoscaling signals can amplify incidents.
 
-### Layer 5 exit criteria
+## 6.13 Observability with OpenTelemetry — SHOULD
 
-You should be able to draw and explain:
+Learn:
+
+- logs
+- metrics
+- traces
+- context propagation
+- correlation IDs
+- distributed tracing
+- latency percentiles
+- service/resource attributes
+- collector concepts
+
+Trace one request across:
 
 ```text
-User
-  ↓
-DNS
-  ↓
-CDN / edge
-  ↓
-Load balancer
-  ↓
-Application instances
-  ↓
-Cache / database / messaging
+gateway
+→ service
+→ database
+→ event producer
+→ broker
+→ consumer
 ```
 
-and describe how an application can be deployed and horizontally scaled.
+## 6.14 SLI, SLO, SLA, and error budgets — SHOULD
 
-## Layer 6: Distributed systems
+Learn:
 
-This layer answers: **what changes when one logical system spans multiple machines and failures are normal?**
+- availability SLI
+- latency SLI
+- correctness/freshness where relevant
+- SLO
+- SLA
+- error budget
+- symptom-based alerting
 
-Distributed systems are difficult because the network is not perfectly reliable, clocks are not perfectly synchronized, nodes fail independently, and messages can be delayed or duplicated.
+## 6.15 Service mesh — ADVANCED
 
-### 6.1 Fundamental failure model
+Learn only after understanding service networking.
 
-Assume that:
+Concepts:
 
-- requests can time out
-- responses can be lost
-- servers can crash
-- dependencies can become slow
-- network partitions can occur
-- messages can be duplicated
-- messages can arrive late or out of order
+- data plane
+- control plane
+- mTLS
+- traffic policy
+- telemetry
+- retries/timeouts
+- service identity
 
-Design for these conditions instead of treating them as impossible edge cases.
+Examples: Istio/Linkerd.
 
-### 6.2 Latency
+Do not add a mesh solely because the architecture uses microservices.
 
-Understand that remote communication is much slower and less predictable than in-process function calls.
+## 6.16 Serverless — SHOULD
 
-Reducing unnecessary network hops often improves both latency and reliability.
+Learn:
 
-### 6.3 Availability
+- event-driven functions
+- cold starts
+- runtime limits
+- scaling
+- concurrency
+- platform coupling
+- idle vs burst cost
+- observability
 
-Availability asks whether the system can continue serving acceptable requests when components fail.
+## 6.17 Capacity and cost engineering — SHOULD
 
-Techniques include:
+Learn:
 
+- p50/p95/p99
+- throughput
+- concurrency
+- Little’s Law conceptually
+- CPU/memory/disk/network saturation
+- load testing
+- headroom
+- storage growth
+- data transfer
+- managed-service cost
+- observability cost
+- idle failover capacity
+- engineering/operational cost
+
+## Layer 6 hands-on
+
+- Run multiple app instances behind a load balancer.
+- Containerize the capstone.
+- Deploy to Kubernetes.
+- Misconfigure probes, observe failure, then fix them.
+- Reproduce infrastructure with Terraform.
+- Build CI/CD.
+- Deploy rolling, blue/green, and canary variants.
+- Inject a regression and roll back from telemetry.
+- Instrument end-to-end traces with OpenTelemetry.
+- Define SLOs and alerts.
+- Compare one bursty worker as container vs serverless.
+
+## Layer 6 exit criteria
+
+You can explain:
+
+- reverse proxy/L4/L7 load balancing
+- horizontal scaling
+- Docker vs orchestration
+- Kubernetes probes and rollouts
+- IaC state/drift
+- CI vs continuous delivery vs continuous deployment
+- expand/migrate/contract DB changes
+- rolling vs blue/green vs canary
+- OTel tracing and SLOs
+- when mesh/serverless are unnecessary
+- capacity and cost trade-offs
+
+---
+
+# Layer 7 — Distributed systems
+
+**Primary question:** What changes when failures, delays, and state span independent machines?
+
+**Difficulty:** advanced
+
+Assume:
+
+- requests time out
+- responses disappear
+- nodes crash independently
+- dependencies become slow
+- networks partition
+- messages duplicate
+- messages reorder
+- clocks disagree
+
+## 7.1 Failure models and partial failure — MUST
+
+A remote call is not a function call.
+
+Learn:
+
+- crash failure
+- timeout ambiguity
+- slow dependencies
+- partitions
+- retry ambiguity
+- cascading failure
+
+## 7.2 Latency, availability, and durability — MUST
+
+Reason about:
+
+- critical paths
+- tail latency
 - redundancy
-- replication
 - failover
-- health checks
 - graceful degradation
-- multi-zone deployment
+- failure domains
 
-### 6.4 Consistency
+## 7.3 Consistency models — MUST/SHOULD
 
-Consistency asks what different clients are allowed to observe after reads and writes.
+**MUST:**
 
-Learn conceptually:
-
-- strong consistency
+- strong consistency conceptually
 - eventual consistency
 - read-your-writes
 - monotonic reads
 
-Do not use "eventual consistency" as an excuse for undefined behavior. Specify what temporary inconsistency is acceptable.
+**SHOULD:**
 
-### 6.5 CAP theorem
+- linearizability
+- serializability
+- causal consistency
 
-Understand CAP as a model for behavior during network partitions rather than as a simple permanent classification of databases.
+Know that these terms answer different questions.
 
-The three properties are:
+## 7.4 CAP — MUST
 
-- consistency
-- availability
-- partition tolerance
+Understand CAP as behavior **during a network partition**, not “pick any two forever.”
 
-When a partition occurs, a distributed system may face trade-offs between maintaining a particular consistency guarantee and continuing to serve all requests.
+## 7.5 PACELC — SHOULD
 
-### 6.6 PACELC
+Reason about:
 
-PACELC extends the discussion:
+```text
+Partition:
+Availability vs Consistency
 
-- if there is a **Partition**, choose between **Availability** and **Consistency**
-- **Else**, choose between **Latency** and **Consistency**
+Else:
+Latency vs Consistency
+```
 
-The useful lesson is that consistency trade-offs also exist during normal operation.
-
-### 6.7 Replication and failover
+## 7.6 Replication, quorum, and failover — MUST
 
 Learn:
 
-- leader election conceptually
-- failover
-- split brain
-- replication lag
-- quorum concepts
-- read/write quorums conceptually
-
-### 6.8 Consensus
-
-Understand why distributed nodes sometimes need agreement.
-
-Study at a conceptual level:
-
-- consensus problem
+- leaders
+- followers
 - leader election
 - quorum
-- Raft
-- Paxos at a high level
+- read/write quorum concepts
+- replication lag
+- split brain
+- stale reads
+- failover
 
-You usually do not need to implement these algorithms, but you should know what problem they solve.
+## 7.7 Consensus — SHOULD
 
-### 6.9 Distributed locks
+Understand what problem consensus solves.
 
-Distributed locks may be required when multiple processes coordinate access to a shared resource.
+Study:
 
-Learn the risks:
+- replicated state machine
+- leader election
+- log replication
+- majority/quorum
+- safety
+- liveness conceptually
+
+### Raft — SHOULD
+
+Learn:
+
+- terms
+- leader election
+- log replication
+- commit
+- majority
+- leader failure
+- partition behavior
+
+### Paxos — ADVANCED
+
+Know what family of problem it solves; deep implementation knowledge is optional for most backend roles.
+
+## 7.8 Distributed locks, leases, and fencing — SHOULD
+
+Learn:
 
 - lease expiry
-- stale lock holders
+- stale lock holder
+- partitions
 - clock assumptions
-- network partitions
-- fencing tokens conceptually
+- fencing tokens
 
-Prefer designs that avoid distributed locks when simpler data constraints or partition ownership can solve the problem.
+Prefer designs based on data constraints or ownership where possible.
 
-### 6.10 Idempotency in distributed systems
+## 7.9 Logical clocks and ordering — SHOULD
 
-Because retries are unavoidable, repeated requests must often be safe.
+Learn:
 
-Example payment flow:
+- clock skew
+- monotonic clocks conceptually
+- Lamport clocks
+- vector clocks conceptually
+- sequence numbers
+- partition-local ordering
 
-```text
-Client
-   ↓ payment request + idempotency key
-Payment API
-   ↓
-Check key
-   ├─ already processed → return previous result
-   └─ new → execute payment and persist result
-```
+Wall-clock timestamps are not a universal distributed ordering mechanism.
 
-### 6.11 Circuit breaker
+## 7.10 Distributed transactions — SHOULD
 
-A circuit breaker prevents repeated calls to a failing dependency.
+Learn:
 
-Typical states:
+- why global ACID becomes expensive
+- two-phase commit conceptually
+- local transactions
+- saga
+- outbox
+- idempotency
+- reconciliation
+- deterministic transactions as an advanced design point
 
-- closed
-- open
-- half-open
+## 7.11 Resilience patterns — MUST
 
-Combine it carefully with timeouts, retries, and fallback behavior.
+Learn:
 
-### 6.12 Bulkhead isolation
+- timeout
+- deadline
+- retry
+- exponential backoff
+- jitter
+- circuit breaker
+- bulkhead
+- fallback
+- graceful degradation
 
-Separate resource pools so one failing dependency or traffic class cannot consume every thread, connection, or worker.
+## 7.12 Rate limiting — MUST
 
-### 6.13 Rate limiting
-
-Common algorithms:
+Algorithms:
 
 - fixed window
 - sliding window
 - token bucket
 - leaky bucket
 
-Use cases:
+Design for:
 
-- abuse prevention
-- tenant fairness
-- protecting expensive services
-- API quotas
+- fairness
+- abuse control
+- expensive resources
+- per-tenant quotas
 
-### 6.14 Backpressure
+## 7.13 Backpressure and load shedding — MUST
 
-When producers generate work faster than consumers can process it, the system needs a strategy.
+When producers exceed consumers:
 
-Possible approaches:
-
-- reject requests
 - slow producers
-- buffer temporarily
-- scale consumers
-- prioritize work
-- shed non-critical load
+- bound queues
+- reject
+- prioritize
+- degrade optional work
+- scale
+- shed load
 
-Unbounded queues usually postpone rather than solve overload.
+An unbounded queue often converts overload into a delayed outage.
 
-### 6.15 Distributed transactions
+## Layer 7 hands-on
 
-Understand why traditional multi-resource ACID transactions become difficult across independently deployed services.
+- Inject timeout, latency, packet loss, and crashes.
+- Implement a consistent-hashing ring.
+- Implement distributed-rate-limiter variants.
+- Complete a Raft lab or simplified simulator.
+- Simulate leader failure and minority partitions.
+- Reproduce stale reads under replication lag.
+- Demonstrate fencing tokens in a lease-expiry scenario.
 
-Study alternatives:
+## Layer 7 exit criteria
 
-- local transactions
-- sagas
-- transactional outbox
-- idempotent processing
-- reconciliation jobs
+You can explain:
 
-### 6.16 Service discovery
+- partial failure
+- tail latency
+- CAP/PACELC
+- linearizability vs serializability
+- replication/quorum
+- why consensus exists
+- Raft at a conceptual level
+- distributed lock risks
+- clocks and ordering
+- distributed transaction alternatives
+- retry/circuit breaker/bulkhead/backpressure behavior
 
-In dynamic environments, instances need a way to locate services.
+---
 
-Learn conceptually:
+# Layer 8 — Geo-distributed systems
 
-- client-side discovery
-- server-side discovery
-- DNS/service registry approaches
+**Primary question:** What changes when users, replicas, writes, failures, and legal constraints span geographic regions?
 
-### 6.17 Clock and ordering problems
+**Difficulty:** advanced → expert
 
-Learn why wall-clock timestamps cannot always provide perfect event ordering across machines.
+## 8.1 Failure domains — MUST
 
-Concepts to recognize:
+Progression:
 
-- clock skew
-- logical clocks
-- sequence numbers
-- monotonic ordering within a partition or aggregate
+```text
+single process
+→ multiple instances
+→ multi-zone
+→ multi-region
+```
 
-### Layer 6 exit criteria
+Know which failure each level protects against.
 
-You should be able to explain:
+## 8.2 Cross-region replication — MUST
 
-- why distributed systems fail differently from single-process applications
-- availability vs consistency trade-offs
-- replication and failover
-- idempotency
-- retries, timeouts, and circuit breakers
-- rate limiting and backpressure
-- sagas and outbox
-- why consensus and leader election exist
+Compare:
 
-## Layer 7: System architecture and system design
+- synchronous
+- asynchronous
 
-This is the synthesis layer. You combine the previous six layers to design a complete system.
+Reason about:
 
-The central question becomes:
+- latency
+- durability
+- RPO
+- failover
+- stale data
+- quorum distance
 
-> Given these product requirements, scale targets, reliability requirements, and constraints, what architecture should we choose and why?
+## 8.3 Multi-region topologies — MUST
 
-### 7.1 Functional requirements
+| Topology | Main trade-off |
+| --- | --- |
+| Single region, multi-AZ | simple; region remains a failure domain |
+| Active-passive | simpler write ownership; failover/idle capacity |
+| Active-active stateless + one write region | global compute/read locality; centralized writes |
+| Active-active with regional ownership | local writes; ownership movement complexity |
+| Multi-writer database | local/global write flexibility; conflict/consensus cost |
 
-Define what the product must do.
+Multi-region does **not** automatically mean active-active writes.
 
-Example for a chat system:
+## 8.4 Geo-partitioning and home-region routing — SHOULD
 
-- send a direct message
-- create a group conversation
-- receive messages in near real time
-- display conversation history
-- show message delivery/read state
-- support multiple devices
+Model:
 
-Do not begin drawing infrastructure until the core requirements are clear.
+```text
+tenant/user
+    ↓
+home region
+    ↓
+shard
+    ↓
+replica set
+```
 
-### 7.2 Non-functional requirements
+Learn:
 
-Define quality targets:
+- ownership
+- routing
+- locality
+- migration
+- cross-region workflows
+
+## 8.5 Cross-region quorum and latency — SHOULD
+
+Understand why globally distributed consensus makes geography part of write latency.
+
+Study Spanner/CockroachDB concepts as examples.
+
+## 8.6 Active-active conflicts — ADVANCED
+
+Analyze invariants such as:
+
+- unique username
+- inventory decrement
+- payment capture
+- monotonically increasing sequences
+- session/read-your-writes
+
+Do not say “active-active” without explaining conflict and consistency behavior.
+
+## 8.7 Multi-tenancy at geographic scale — SHOULD
+
+Consider:
+
+- tenant home region
+- data residency
+- dedicated tenants
+- encryption/key locality
+- hot tenant isolation
+- tenant migration
+- failover eligibility
+- cost attribution
+
+## 8.8 Disaster recovery — MUST
+
+Learn:
+
+- backup
+- restore
+- replication
+- failover
+- failback
+- RTO
+- RPO
+- runbooks
+- drills
+
+A DR plan that is never exercised is an assumption.
+
+## 8.9 Multi-region cost — SHOULD
+
+Include:
+
+- duplicate compute
+- database replicas
+- cross-region transfer
+- replication
+- cache
+- logs/traces
+- idle failover capacity
+- operational burden
+
+## Layer 8 hands-on
+
+- Simulate 50/100/200 ms inter-region latency.
+- Compare local vs quorum writes.
+- Design active-passive and execute a failover drill.
+- Design active-active and list every harder invariant.
+- Define tenant home-region placement.
+- Write RTO/RPO and a DR runbook.
+- Produce a multi-region cost model.
+
+## Layer 8 exit criteria
+
+You can explain:
+
+- multi-AZ vs multi-region
+- sync vs async cross-region replication
+- active-passive vs active-active
+- geo-partitioned ownership
+- cross-region quorum latency
+- regional tenancy/data residency
+- RTO/RPO
+- when multi-region is not worth the cost
+
+---
+
+# Layer 9 — System architecture and evolution
+
+**Primary question:** Given requirements and constraints, what architecture should exist now, and how should it evolve later?
+
+**Difficulty:** advanced → expert synthesis
+
+## 9.1 Functional requirements — MUST
+
+Define what the product must do before drawing infrastructure.
+
+## 9.2 Non-functional requirements — MUST
+
+Specify:
 
 - latency
 - throughput
 - availability
 - durability
 - consistency
-- scalability
 - security
 - compliance
-- cost
+- geography
 - maintainability
+- cost
 
-Different requirements can produce very different architectures for the same feature set.
+## 9.3 Capacity estimation — MUST
 
-### 7.3 Capacity estimation
+Estimate enough to drive decisions:
 
-Estimate order of magnitude, not false precision.
-
-Useful inputs:
-
-- daily active users
-- requests per second
+- active users
+- RPS
 - peak multiplier
 - read/write ratio
-- average payload size
+- payload size
 - storage growth
 - bandwidth
-- retention period
+- retention
 
-Example:
+Avoid false precision.
 
-```text
-10,000,000 active users/day
-× 20 messages/user/day
-= 200,000,000 messages/day
-```
+## 9.4 API and communication design — MUST
 
-Average writes per second:
+Choose:
 
-```text
-200,000,000 / 86,400 ≈ 2,315 messages/second
-```
+- REST
+- gRPC
+- WebSocket
+- SSE
+- webhook
+- queue/stream
 
-If peak traffic is 5× average, design for roughly 11,600 writes/second before adding safety margin and considering read traffic.
+based on interaction requirements rather than one global preference.
 
-The purpose is to reveal which components may become bottlenecks.
+## 9.5 Data model and invariants — MUST
 
-### 7.4 API design
+Start from:
 
-Define important interfaces.
+- critical entities
+- invariants
+- query paths
+- consistency needs
+- partition keys
+- retention
 
-Example:
-
-```http
-POST /conversations/{conversationId}/messages
-GET  /conversations/{conversationId}/messages?cursor=...
-```
-
-For real-time delivery, the same system may also use WebSocket connections.
-
-System design often uses multiple communication mechanisms for different requirements.
-
-### 7.5 Data model
-
-Identify core entities and access patterns.
-
-Chat example:
-
-```text
-User
-Conversation
-ConversationMember
-Message
-MessageReceipt
-```
-
-Then ask:
-
-- query messages by conversation?
-- paginate by time or message ID?
-- query unread counts?
-- find all conversations for a user?
-- retain messages forever?
-
-### 7.6 High-level architecture
+## 9.6 High-level architecture — MUST
 
 Start simple:
 
 ```text
-Clients
-   ↓
-Load balancer
-   ↓
-Application service
-   ↓
+Client
+  ↓
+Application
+  ↓
 Database
 ```
 
-Then introduce complexity only when a requirement demands it.
+Then add components only when requirements justify them.
 
-Possible evolution:
+## 9.7 API Gateway and BFF — SHOULD
 
-```text
-                       ┌───────────────┐
-Clients ──────────────→│ Load balancer │
-                       └───────┬───────┘
-                               ↓
-                     ┌─────────────────┐
-                     │ API / app tier  │
-                     └───────┬─────────┘
-                             │
-                  ┌──────────┼──────────┐
-                  ↓          ↓          ↓
-               Redis      Database    Kafka
-                                         ↓
-                              ┌──────────┼──────────┐
-                              ↓          ↓          ↓
-                          Worker A   Worker B   Analytics
-```
+Learn:
 
-### 7.7 Choosing REST vs WebSocket
+- edge routing
+- authentication
+- rate limiting
+- aggregation
+- protocol translation
+- gateway offloading
+- client-specific BFF
 
-Example reasoning:
+Do not create a BFF when all clients have the same needs.
 
-- use REST for account settings and message-history pagination
-- use WebSocket for low-latency bidirectional message delivery
+## 9.8 Service decomposition and microservices — MUST/SHOULD
 
-The correct system may use both.
+A service boundary should be justified by reasons such as:
 
-### 7.8 Choosing synchronous vs asynchronous communication
+- independent deployment
+- independent scaling
+- team ownership
+- reliability isolation
+- data ownership
+- regulatory/security boundary
+- technology/runtime need
 
-Use synchronous calls when:
+Microservices add:
 
-- the caller needs an immediate result
-- the dependency is part of the request's critical path
-- simple request/response semantics are valuable
+- network failure
+- distributed transactions
+- contracts
+- telemetry
+- deployment complexity
+- data ownership problems
+- higher operational cost
 
-Use asynchronous communication when:
+## 9.9 Failure analysis — MUST
 
-- immediate completion is unnecessary
-- work is expensive or slow
-- buffering protects downstream systems
-- producers and consumers should scale independently
-- event fan-out is needed
+For every component ask:
 
-Do not make every service call asynchronous. Complexity must earn its place.
+> What happens if it is slow, unavailable, duplicated, partitioned, or returns stale data?
 
-### 7.9 Choosing cache placement
-
-Possible caching locations:
-
-```text
-Browser cache
-     ↓
-CDN
-     ↓
-Reverse proxy cache
-     ↓
-Application cache
-     ↓
-Distributed cache
-     ↓
-Database
-```
-
-Each cache changes invalidation, consistency, and observability requirements.
-
-### 7.10 Read-heavy systems
-
-Possible techniques:
-
-- caching
-- CDN
-- read replicas
-- precomputation
-- denormalization
-- pagination
-- search indexes
-
-### 7.11 Write-heavy systems
-
-Possible techniques:
-
-- batching
-- partitioning
-- append-oriented storage
-- asynchronous processing
-- queue buffering
-- efficient indexes
-- avoiding unnecessary synchronous fan-out
-
-### 7.12 Hotspot handling
-
-Examples:
-
-- celebrity account receives huge traffic
-- one shard contains a popular tenant
-- one cache key receives millions of requests
-
-Possible strategies:
-
-- caching
-- replication
-- partition splitting
-- key salting in appropriate designs
-- request coalescing
-- CDN/edge caching
-- special handling for extreme entities
-
-### 7.13 Failure analysis
-
-For every component, ask:
-
-> What happens if this component becomes slow or unavailable?
-
-Examples:
-
-- database primary fails
-- cache is unavailable
-- queue fills up
-- consumer crashes
-- external payment provider times out
-- one region becomes unreachable
-
-A design is incomplete until failure behavior is discussed.
-
-### 7.14 Bottleneck analysis
+## 9.10 Bottleneck analysis — MUST
 
 Potential bottlenecks:
 
-- database CPU
-- disk I/O
-- connection pool
-- hot partitions
-- cache hotspots
-- message broker partitions
-- application CPU
+- database CPU/I/O
+- connection pools
+- hot shards
+- cache keys
+- broker partitions
 - thread pools
-- network bandwidth
+- network
 - external APIs
+- lock contention
+- region links
 
-### 7.15 Cost awareness
+## 9.11 Security analysis — MUST
 
-System design is not only about maximum scale.
+Include:
 
-Consider:
+- trust boundaries
+- authentication
+- authorization
+- tenant isolation
+- secrets
+- encryption
+- abuse/rate limits
+- auditability
 
-- compute cost
-- storage cost
-- data-transfer cost
-- managed-service cost
-- engineering/operational cost
+## 9.12 Observability and operability — MUST
 
-The best architecture is often the simplest architecture that safely meets the requirements.
+Include:
 
-## Cross-cutting concerns
+- SLO
+- logs
+- metrics
+- traces
+- dashboards
+- alerts
+- runbooks
+- rollback
+- repair/reconciliation
 
-These concerns apply across all seven layers.
+## 9.13 Cost analysis — MUST
 
-### Security
+Architecture is not a contest for maximum redundancy.
+
+Ask:
+
+- what must scale?
+- what can stay simple?
+- which managed service reduces human cost?
+- which replication is actually required?
+- what is the cost of observability/data transfer?
+
+## 9.14 Architecture evolution — MUST
+
+Prefer:
+
+```text
+measure constraint
+→ isolate boundary
+→ introduce abstraction
+→ migrate incrementally
+→ validate
+→ retire old path
+```
+
+over:
+
+```text
+announce rewrite
+→ recreate every dependency over network
+```
+
+## 9.15 Strangler pattern — SHOULD
+
+Use incremental replacement around existing behavior when moving from a legacy/monolithic system.
+
+## 9.16 Architecture Decision Records — SHOULD
+
+For important decisions record:
+
+- context
+- decision
+- alternatives
+- consequences
+- reversal conditions
+
+## Layer 9 exit criteria
+
+You can:
+
+- clarify requirements before technology choices
+- quantify scale enough to identify bottlenecks
+- define invariants and consistency
+- choose communication and storage intentionally
+- analyze failure/security/operations/cost
+- justify service boundaries
+- propose an incremental migration
+- explain why unnecessary components should be removed
+
+---
+
+# Cross-cutting concerns
+
+These are **not one final layer**. Apply them to every layer.
+
+## Security
 
 Learn:
 
 - authentication vs authorization
 - sessions
-- JWT concepts and trade-offs
+- JWT trade-offs
 - OAuth 2.0 / OpenID Connect concepts
-- TLS
+- TLS/mTLS
 - encryption at rest
-- secrets management
+- secret management
 - least privilege
 - input validation
-- common web-security risks
-- rate limiting
+- common web/API risks
 - audit logging
+- tenant isolation
+- supply-chain/dependency risk conceptually
 
-Security should be part of the design, not added after the architecture is complete.
+Ask at every layer:
 
-### Observability
+> Who is allowed to perform this operation, on which resource, under which identity?
 
-The three common observability signals are:
+## Observability
+
+Use:
 
 - logs
 - metrics
 - traces
-
-Learn:
-
-- correlation/request IDs
-- structured logging
+- correlation/context
 - latency percentiles
-- error rates
-- throughput
+- traffic
+- errors
 - saturation
-- distributed tracing
-- dashboards
-- alerting
+- consumer lag
+- replication lag
+- freshness metrics
 
-A distributed architecture that cannot be observed is extremely difficult to operate.
+Observability should start in Layer 1–3, not only after Kubernetes.
 
-### Reliability
+## Reliability
 
 Learn:
 
-- SLI
-- SLO
-- SLA
-- error budgets conceptually
+- SLI/SLO/SLA
+- error budgets
 - redundancy
+- failover
 - backups
-- disaster recovery
-- recovery time objective (RTO)
-- recovery point objective (RPO)
+- restore
+- RTO/RPO
+- graceful degradation
+- reconciliation
+- incident/runbook thinking
 
-### Testing
+## Testing
 
-System-level testing may include:
+Use a portfolio:
 
-- unit tests
-- integration tests
-- contract tests
-- end-to-end tests
-- load tests
-- stress tests
-- failure/chaos testing where justified
+- unit
+- module/component
+- repository/integration
+- contract
+- end-to-end
+- migration
+- load
+- stress
+- fault/chaos where justified
 
-### Data governance and privacy
+## Performance
 
-Depending on the product, consider:
+Learn:
 
-- data retention
-- deletion requirements
+- latency
+- throughput
+- concurrency
+- p50/p95/p99
+- queueing
+- backpressure
+- CPU/memory/disk/network saturation
+- thread/connection pool sizing
+- profiling
+- load testing
+- capacity headroom
+
+## Data governance and privacy
+
+Consider:
+
+- retention
+- deletion
 - auditability
-- personally identifiable information
-- regional data requirements
-- access controls
+- PII
+- regional requirements
+- access control
+- backup retention
+- data lineage where relevant
 
-## How the layers connect
+## Cost
 
-Consider a user creating an order.
+Include cost before final architecture approval:
+
+- compute
+- storage
+- database
+- cache
+- messaging
+- data transfer
+- observability
+- failover capacity
+- engineering/operations
+
+---
+
+# One evolving capstone
+
+Use **one long-running system** to learn architectural evolution.
+
+Recommended example:
+
+> **Multi-tenant e-commerce/marketplace platform**
+
+Possible domains:
+
+```text
+Identity
+Catalog
+Ordering
+Inventory
+Billing
+Fulfillment
+Search
+Notification
+Reporting
+```
+
+## Capstone evolution
+
+### Stage 1 — Simple system
 
 ```text
 Client
-  │
-  │ HTTPS / REST
-  ▼
-Load balancer
-  ▼
-Order API
-  │
-  ├────────→ Redis cache
-  │
-  ├────────→ SQL database
-  │
-  └────────→ Message broker
-                  │
-         ┌────────┼─────────┐
-         ▼        ▼         ▼
-      Payment  Inventory  Notification
+  ↓
+Spring Boot / backend app
+  ↓
+PostgreSQL
 ```
 
-This one diagram contains almost the entire roadmap:
-
-| Component | Relevant layer |
-| --- | --- |
-| SQL database | Layer 1 — Data |
-| Redis | Layer 1 — Data/caching |
-| Order API code | Layer 2 — Application |
-| HTTPS/REST | Layer 3 — Communication |
-| Message broker | Layer 4 — Messaging |
-| Load balancer/runtime | Layer 5 — Infrastructure |
-| retries, consistency, failures | Layer 6 — Distributed systems |
-| deciding how everything fits together | Layer 7 — System design |
-
-That is why topics such as REST vs WebSocket or sync vs async are "system design topics" while also belonging to more specific lower-level domains.
-
-## Recommended learning order
-
-### Phase 0: Prerequisites
-
-Know enough of:
-
-- one backend programming language
-- Git
-- command line
-- basic SQL
-- basic HTTP
-- basic Linux
-
-For Java developers, a useful baseline is Java + Spring Boot + PostgreSQL/MySQL.
-
-### Phase 1: Data fundamentals
-
-Study:
-
-1. relational modeling
-2. SQL queries
-3. indexes
-4. transactions
-5. isolation and locks
-6. Redis/caching
-7. replication
-8. sharding
-9. SQL vs NoSQL
-
-Build: a CRUD application with a real relational database, indexes, transactions, and pagination.
-
-### Phase 2: Application runtime
-
-Study:
-
-1. request lifecycle
-2. application layering
-3. threads
-4. thread pools
-5. concurrency
-6. sync vs async
-7. blocking vs non-blocking
-8. background jobs
-9. idempotency
-
-Build: an API that performs background report generation or email delivery.
-
-### Phase 3: Communication
-
-Study:
-
-1. TCP/IP basics
-2. DNS
-3. HTTP/HTTPS
-4. REST
-5. WebSocket
-6. SSE
-7. polling
-8. gRPC
-9. webhooks
-10. timeouts/retries
-
-Build: a notification or chat prototype using REST plus WebSocket/SSE.
-
-### Phase 4: Messaging
-
-Study:
-
-1. message queues
-2. producer/consumer
-3. pub/sub
-4. Kafka
-5. RabbitMQ
-6. retries
-7. DLQ
-8. ordering
-9. idempotent consumers
-10. outbox
-11. saga
-
-Build: an order system that publishes events and has separate notification/inventory consumers.
-
-### Phase 5: Infrastructure
-
-Study:
-
-1. Linux process/network basics
-2. Nginx/reverse proxy
-3. load balancing
-4. Docker
-5. CDN
-6. object storage
-7. deployment strategies
-8. Kubernetes concepts
-9. autoscaling
-
-Build: containerize the application and run multiple instances behind a reverse proxy/load balancer.
-
-### Phase 6: Distributed systems
-
-Study:
-
-1. failure models
-2. consistency
-3. availability
-4. CAP/PACELC
-5. replication
-6. consensus concepts
-7. distributed locks
-8. idempotency
-9. resilience patterns
-10. backpressure
-11. distributed transactions
-
-Build: deliberately inject dependency failures and design retries, timeouts, circuit breakers, and reconciliation.
-
-### Phase 7: Full system design
-
-Practice complete designs:
-
-1. URL shortener
-2. rate limiter
-3. notification system
-4. chat system
-5. news feed
-6. file-storage service
-7. search/autocomplete system
-8. ride-hailing system
-9. video-streaming platform
-10. e-commerce/order system
-11. payment system
-
-For each design, explain not only what you choose but why alternatives were rejected.
-
-## Practice projects
-
-### Project 1: URL shortener
-
 Learn:
 
-- API design
-- ID generation
-- database schema
-- cache
-- redirects
-- read-heavy scaling
-- expiration
-- analytics asynchronously
-
-### Project 2: Rate limiter
-
-Learn:
-
-- token bucket/sliding window
-- Redis
-- atomic operations
-- distributed coordination
-- per-user/per-IP limits
-- failure behavior
-
-### Project 3: Notification service
-
-Learn:
-
-- REST API
-- asynchronous queue
-- retries
-- DLQ
-- email/SMS/push channels
-- templates
-- user preferences
-- idempotency
-
-### Project 4: Chat system
-
-Learn:
-
-- REST + WebSocket
-- persistent connections
-- message storage
-- ordering
-- unread counts
-- online presence
-- fan-out
-- connection routing
-- multi-device delivery
-
-### Project 5: E-commerce order system
-
-Learn:
-
+- REST
+- schema
 - transactions
-- inventory consistency
-- payments
-- outbox
-- saga
-- idempotency
-- events
-- eventual consistency
-- reconciliation
-
-### Project 6: News feed
-
-Learn:
-
-- fan-out on write vs fan-out on read
-- cache
-- ranking
-- hot users
 - pagination
-- precomputation
-- eventual consistency
 
-### Project 7: File-storage service
+### Stage 2 — Data-aware application
 
-Learn:
+Add:
 
-- metadata vs binary storage
-- object storage
-- multipart uploads
-- CDN
-- signed URLs
-- replication
-- lifecycle/retention
+- indexes
+- query-plan analysis
+- Redis
+- idempotency
+- background jobs
 
-## System design interview workflow
+Measure actual bottlenecks.
 
-A disciplined design process is more valuable than immediately drawing many boxes.
+### Stage 3 — Specialized storage
 
-### Step 1: Clarify requirements
+Add only with a requirement:
+
+- object storage for media
+- search index for catalog search
+- analytics/OLAP path
+
+### Stage 4 — Modular monolith
+
+Refactor into explicit domains and enforce dependency boundaries.
+
+### Stage 5 — Reliable asynchronous integration
+
+Add:
+
+- queue/stream
+- outbox
+- CDC
+- schema evolution
+- idempotent consumers
+
+### Stage 6 — Selective services
+
+Extract only one or two boundaries, for example:
+
+- Search
+- Notifications
+
+Keep the rest modular until independent deployment/scaling is justified.
+
+### Stage 7 — Production platform
+
+Add:
+
+- Docker
+- Kubernetes
+- Terraform
+- CI/CD
+- OpenTelemetry
+- SLOs
+- canary/rollback
+
+### Stage 8 — Failure engineering
+
+Inject:
+
+- DB latency
+- broker outage
+- duplicate events
+- service timeout
+- node failure
+- overload
+
+Design recovery rather than only happy paths.
+
+### Stage 9 — Multi-region
+
+Add:
+
+- home-region routing
+- active-passive first
+- explicit RTO/RPO
+- failover drill
+- optional active-active comparison
+- cost model
+
+The final architecture is **not** a target to copy. Every box must answer:
+
+> Why does this need to exist?
+
+---
+
+# Focused practice projects
+
+Use smaller projects to isolate individual mechanisms while the capstone teaches evolution.
+
+| Project | Primary learning goals |
+| --- | --- |
+| URL shortener | ID generation, cache, key-value access, capacity |
+| Rate limiter | algorithms, Redis/atomicity, distributed state |
+| Notification service | queue, retry, DLQ, idempotency |
+| Chat | WebSocket, presence, ordering, fan-out, connection routing |
+| News feed | fan-out write/read, cache, hot users, ranking |
+| File storage | object storage, multipart upload, metadata, CDN |
+| Search/autocomplete | inverted index, ranking, freshness, cache |
+| E-commerce checkout | transactions, inventory, payment, saga, outbox |
+| Payment service | idempotency, ledger/invariants, reconciliation |
+| Kafka-like log | partitions, offsets, replication, retention |
+| Multi-tenant SaaS | isolation, quotas, noisy neighbor, placement |
+| Global key-value store | replication, quorum, consistency, partition behavior |
+
+For each project answer:
+
+1. What requirement causes the architecture?
+2. What simpler design could work first?
+3. What trade-off is accepted?
+4. What new failure mode appears?
+5. Would the same choice make sense at 1/1000 of the scale?
+
+---
+
+# Recommended learning plan
+
+A standard route is approximately **40 weeks at 10–12 focused hours/week**.
+
+Do not compress by removing experiments; compress reading before hands-on work.
+
+## Phase map
+
+| Weeks | Focus |
+| ---: | --- |
+| 1–6 | Layer 1 — Data and storage |
+| 7–10 | Layer 2 — Runtime and code |
+| 11–14 | Layer 3 — Networking and communication |
+| 15–18 | Layer 4 — Codebase architecture |
+| 19–24 | Layer 5 — Messaging and integration |
+| 25–30 | Layer 6 — Infrastructure and platform |
+| 31–35 | Layer 7 — Distributed systems |
+| 36–38 | Layer 8 — Geo-distributed systems |
+| 39–40 | Layer 9 — Architecture synthesis and defense |
+
+Suggested weekly split:
+
+```text
+30% reading / primary documentation
+50% implementation + experiments
+10% failure injection / measurement
+10% architecture notes / interview defense
+```
+
+## Priority path
+
+If time is limited, complete **MUST** topics first.
+
+### MUST core
+
+- relational data, indexes, transactions
+- caching
+- replication and sharding
+- object storage basics
+- runtime/concurrency/pools
+- HTTP/REST
+- WebSocket basics
+- timeout/retry/idempotency
+- modular monolith and boundaries
+- queue/Kafka/RabbitMQ concepts
+- outbox and saga
+- Docker/load balancing
+- deployment strategies
+- distributed failure/CAP
+- resilience/rate limiting/backpressure
+- multi-region fundamentals and DR
+- requirements/capacity/failure/cost reasoning
+
+### SHOULD next
+
+- WAL/recovery
+- distributed SQL
+- distributed IDs
+- search internals
+- gRPC/GraphQL/SSE
+- Clean/Hexagonal/DDD
+- CDC/schema evolution/CQRS
+- Kubernetes/IaC/OTel/SLO
+- consensus/Raft
+- locks/fencing/logical clocks
+- geo partitioning
+- ADRs/Strangler
+
+### ADVANCED specialization
+
+- Event Sourcing
+- stream processing/Flink
+- Paxos details
+- service mesh
+- active-active multi-writer
+- causal consistency details
+- advanced distributed transaction systems
+
+---
+
+# System design interview workflow
+
+Use the same process in every design.
+
+## Step 1 — Clarify requirements
 
 Ask:
 
 - Who uses the system?
 - What are the critical features?
-- Which features are out of scope?
+- What is out of scope?
 - Is real-time behavior required?
-- What consistency guarantees are required?
+- Which invariants cannot be violated?
 
-### Step 2: Define scale
+## Step 2 — Define non-functional requirements
+
+Clarify:
+
+- latency
+- availability
+- durability
+- consistency
+- geography
+- compliance
+- cost
+
+## Step 3 — Estimate scale
 
 Estimate:
 
 - users
-- requests per second
+- RPS
+- peak multiplier
 - read/write ratio
-- data size
+- object/message sizes
+- storage growth
 - bandwidth
 - retention
-- peak traffic
 
-### Step 3: Define APIs
+## Step 4 — Define core APIs
 
-Write only the important interfaces.
+Only important interfaces.
 
-### Step 4: Define data model
+## Step 5 — Define entities, invariants, and access patterns
 
-Focus on entities and access patterns.
+Do not choose a database before understanding the data behavior.
 
-### Step 5: Draw a simple high-level design
+## Step 6 — Draw the simplest viable architecture
 
 Start with:
 
 ```text
-Client → API → Database
+Client → Application → Database
 ```
 
-Then add components only when requirements justify them.
+## Step 7 — Identify the first bottlenecks
 
-### Step 6: Identify bottlenecks
+Ask what fails first under the stated scale.
 
-Ask what breaks first as load increases.
+## Step 8 — Scale selectively
 
-### Step 7: Scale selectively
+Potential tools:
 
-Consider:
-
-- caching
+- cache
+- CDN
 - replicas
 - partitioning
-- queues
-- CDN
-- additional application instances
+- queues/streams
+- search index
+- more application instances
 
-Do not add all of them by default.
+Do not add all by default.
 
-### Step 8: Discuss reliability
+## Step 9 — Analyze failure
 
-Cover:
+Discuss:
 
-- timeouts
-- retries
-- failover
-- duplicate requests/messages
-- dependency outages
-- data recovery
+- slow dependency
+- node failure
+- DB failover
+- duplicate request/event
+- queue backlog
+- cache outage
+- network partition
+- region outage
 
-### Step 9: Discuss trade-offs
+## Step 10 — Discuss consistency and recovery
 
-Explicitly state decisions such as:
+Define actual guarantees, not vague “eventual consistency.”
 
-- SQL over NoSQL because strong relational transactions dominate the workload
-- WebSocket for real-time delivery but REST for history retrieval
-- asynchronous events for notifications because they do not belong in the order-creation critical path
+## Step 11 — Cover security and observability
 
-### Step 10: Revisit requirements
+Include authz, abuse protection, telemetry, SLOs, alerting, and repair paths.
 
-Confirm that the final design satisfies the original functional and non-functional requirements.
+## Step 12 — Cover cost and evolution
 
-## Mastery checklist
+Ask:
 
-### Data and storage
+- Which component is most expensive?
+- Which complexity can be deferred?
+- How does the next architecture evolve without a rewrite?
 
-- [ ] I can model relational data and explain normalization vs denormalization.
-- [ ] I understand indexes and can interpret basic query-plan reasoning.
-- [ ] I understand ACID and common isolation levels.
-- [ ] I understand optimistic and pessimistic concurrency control.
-- [ ] I can compare SQL and major NoSQL models.
-- [ ] I understand cache-aside and common cache failure modes.
-- [ ] I can explain replication vs sharding.
-- [ ] I understand shard-key and hotspot problems.
+A strong answer should be able to say both:
 
-### Application and code
+> We need component X because of requirement Y.
 
-- [ ] I can explain a backend request lifecycle.
-- [ ] I understand processes, threads, and thread pools.
-- [ ] I understand race conditions and synchronization.
+and:
+
+> We do **not** need component Z yet.
+
+---
+
+# Mastery checklist
+
+## Layer 1 — Data
+
+- [ ] I can model relational data from invariants and access patterns.
+- [ ] I can explain index trade-offs and query plans.
+- [ ] I understand ACID, MVCC, locking, and common isolation anomalies.
+- [ ] I understand WAL/recovery at a practical level.
+- [ ] I can explain caching failure modes.
+- [ ] I understand replication vs partitioning/sharding.
+- [ ] I can select and defend a shard key.
+- [ ] I understand SQL vs major NoSQL models.
+- [ ] I understand distributed IDs, search indexes, object storage, and OLTP/OLAP.
+
+## Layer 2 — Runtime
+
+- [ ] I can explain process/thread/concurrency basics.
 - [ ] I can distinguish sync/async from blocking/non-blocking.
+- [ ] I understand thread-pool and connection-pool saturation.
 - [ ] I understand transaction boundaries.
-- [ ] I can design idempotent application operations.
-- [ ] I know when to use background jobs.
+- [ ] I can design idempotent operations.
+- [ ] I know when work should become a background job.
 
-### Communication
+## Layer 3 — Networking
 
-- [ ] I understand TCP, ports, DNS, TLS, and HTTP at a practical level.
-- [ ] I can design a REST API.
-- [ ] I can explain REST vs WebSocket.
-- [ ] I understand SSE, polling, gRPC, GraphQL, and webhooks conceptually.
-- [ ] I use explicit timeouts for remote calls.
-- [ ] I understand safe retry strategies.
+- [ ] I understand DNS, TCP, TLS, HTTP, and proxies practically.
+- [ ] I understand HTTP/1.1 vs HTTP/2 vs HTTP/3 conceptually.
+- [ ] I can design REST APIs.
+- [ ] I can choose REST, gRPC, WebSocket, SSE, polling, GraphQL, or webhook appropriately.
+- [ ] I use explicit timeouts/deadlines.
+- [ ] I understand retry amplification and jitter.
 
-### Messaging
+## Layer 4 — Codebase architecture
 
-- [ ] I understand queues, topics, producers, and consumers.
-- [ ] I understand Kafka fundamentals.
-- [ ] I understand RabbitMQ fundamentals.
-- [ ] I can explain queue vs pub/sub use cases.
-- [ ] I understand duplicate delivery and idempotent consumers.
-- [ ] I understand ordering trade-offs.
-- [ ] I understand retries and DLQs.
-- [ ] I understand outbox and saga patterns.
+- [ ] I can explain monolith vs modular monolith.
+- [ ] I understand Clean/Hexagonal principles.
+- [ ] I understand DDD bounded contexts.
+- [ ] I can define module/data ownership boundaries.
+- [ ] I know why bounded context does not automatically mean microservice.
+- [ ] I understand major multi-tenancy isolation models.
+- [ ] I can enforce boundaries with tests/rules.
 
-### Infrastructure
+## Layer 5 — Messaging
 
-- [ ] I understand reverse proxies and load balancers.
-- [ ] I understand horizontal vs vertical scaling.
-- [ ] I understand stateless service design.
-- [ ] I can containerize an application.
-- [ ] I understand CDN and object-storage use cases.
-- [ ] I understand basic deployment strategies.
-- [ ] I understand Kubernetes concepts at a high level.
+- [ ] I can explain task queue vs event stream.
+- [ ] I understand RabbitMQ and Kafka fundamentals.
+- [ ] I understand delivery, ordering, duplicate, replay, and consumer lag.
+- [ ] I understand retries/DLQ recovery.
+- [ ] I understand transactional outbox.
+- [ ] I understand CDC and schema evolution.
+- [ ] I understand saga.
+- [ ] I can distinguish CQRS from event sourcing.
+- [ ] I understand when stream processing is justified.
 
-### Distributed systems
+## Layer 6 — Platform
 
-- [ ] I expect partial failure and network timeouts.
-- [ ] I understand consistency vs availability trade-offs.
-- [ ] I understand CAP and PACELC at a practical level.
-- [ ] I understand replication and failover issues.
-- [ ] I understand why consensus exists.
-- [ ] I understand distributed-lock risks.
-- [ ] I understand idempotency across service boundaries.
-- [ ] I understand circuit breakers, bulkheads, rate limiting, and backpressure.
-- [ ] I understand distributed-transaction alternatives.
+- [ ] I understand reverse proxies/load balancing.
+- [ ] I can containerize and horizontally scale an application.
+- [ ] I understand Kubernetes basics and probes.
+- [ ] I understand IaC/state/drift.
+- [ ] I understand CI/CD.
+- [ ] I understand DB expand/migrate/contract deployment.
+- [ ] I can compare rolling, blue/green, and canary.
+- [ ] I can trace a request with logs/metrics/traces.
+- [ ] I can define SLIs/SLOs.
+- [ ] I consider capacity and cost.
 
-### Full system design
+## Layer 7 — Distributed systems
 
-- [ ] I clarify functional requirements before choosing technology.
-- [ ] I define non-functional requirements.
-- [ ] I perform order-of-magnitude capacity estimates.
-- [ ] I design APIs around real use cases.
-- [ ] I model data around access patterns.
-- [ ] I start with a simple architecture.
-- [ ] I identify bottlenecks before adding scaling mechanisms.
-- [ ] I discuss failure scenarios.
-- [ ] I explain trade-offs instead of claiming one technology is always best.
-- [ ] I consider cost, operations, security, and observability.
+- [ ] I expect partial failure.
+- [ ] I understand CAP/PACELC.
+- [ ] I can distinguish common consistency models.
+- [ ] I understand replication/quorum/failover.
+- [ ] I know why consensus exists and understand Raft conceptually.
+- [ ] I understand distributed-lock/lease/fencing risks.
+- [ ] I understand clock/ordering problems.
+- [ ] I understand distributed transaction alternatives.
+- [ ] I understand circuit breakers, bulkheads, rate limiting, backpressure, and load shedding.
 
-## Glossary
+## Layer 8 — Geo
 
-| Term | Short meaning |
-| --- | --- |
-| Availability | Ability to serve acceptable requests despite failures |
-| Backpressure | Controlling producers when consumers cannot keep up |
-| Cache | Faster storage holding reusable data to reduce latency/load |
-| CDN | Distributed edge network for serving cacheable content closer to users |
-| Consumer | Component that reads/processes messages or events |
-| DLQ | Queue holding messages that repeatedly failed processing |
-| Eventual consistency | Model where replicas may temporarily differ but converge later under defined assumptions |
-| Idempotency | Property allowing repeated logical operations without unintended extra side effects |
-| Load balancer | Component that distributes traffic across multiple servers |
-| Message broker | Infrastructure that transports messages between producers and consumers |
-| Partition | Division of a dataset or event stream into subsets |
-| Producer | Component that creates/publishes messages or events |
-| Pub/Sub | Messaging model where published events can reach multiple subscribers |
-| Replication | Maintaining copies of data on multiple nodes |
-| REST | HTTP-oriented architectural style centered on resources and stateless interactions |
-| Sharding | Horizontal division of data across multiple storage nodes |
-| SSE | Server-to-client event stream over HTTP |
-| WebSocket | Persistent full-duplex communication protocol between client and server |
+- [ ] I understand multi-AZ vs multi-region.
+- [ ] I understand sync vs async cross-region replication.
+- [ ] I can compare active-passive and active-active.
+- [ ] I understand home-region/geo-partitioning strategies.
+- [ ] I understand cross-region quorum latency.
+- [ ] I understand regional tenancy/data residency.
+- [ ] I can define RTO/RPO and a DR procedure.
+- [ ] I can explain multi-region cost.
 
-## Final mental model
+## Layer 9 — Architecture
 
-System design can be reduced to a repeatable chain of reasoning:
+- [ ] I clarify functional and non-functional requirements first.
+- [ ] I estimate scale only enough to drive decisions.
+- [ ] I identify invariants and access patterns.
+- [ ] I start with the simplest viable design.
+- [ ] I identify bottlenecks before adding complexity.
+- [ ] I analyze failure/consistency/recovery.
+- [ ] I include security, observability, and cost.
+- [ ] I can justify service boundaries.
+- [ ] I can propose incremental architecture evolution.
+- [ ] I can explain which components are unnecessary.
+
+---
+
+# Reading and course map
+
+Prefer **primary documentation + experiments**, then books/papers, then interview summaries.
+
+## Core books
+
+- **Designing Data-Intensive Applications, Second Edition** — data-system trade-offs and distributed-system fundamentals
+- **Database Internals** — storage engines, indexes, transactions, recovery, distributed internals
+- **Domain-Driven Design** — strategic domain modeling and bounded contexts
+- **Building Microservices, Second Edition** — service boundaries and incremental decomposition
+- **Continuous Delivery** — deployment pipeline and release engineering
+- **Site Reliability Engineering** — production reliability and operations
+
+## Primary technical references
+
+Networking:
+
+- HTTP semantics/caching/HTTP2/HTTP3/QUIC RFCs
+- TLS 1.3 RFC
+
+Data:
+
+- PostgreSQL documentation
+- MySQL/InnoDB documentation
+- MongoDB documentation
+- CockroachDB documentation
+- Elasticsearch/Lucene documentation
+
+Messaging and streaming:
+
+- Apache Kafka documentation
+- RabbitMQ documentation
+- Debezium documentation
+- Apache Avro / Protocol Buffers documentation
+- Apache Flink documentation
+
+Platform:
+
+- Kubernetes documentation
+- Terraform documentation
+- OpenTelemetry documentation
+- Istio documentation
+
+Security:
+
+- OWASP Web Top 10
+- OWASP API Security Top 10
+
+## Distributed-systems papers
+
+At minimum, study:
+
+- Bigtable
+- Dynamo
+- Spanner
+- Raft
+- CAP (Gilbert/Lynch)
+- PACELC
+- COPS
+- Calvin as an advanced transaction-design comparison
+
+For each paper answer:
+
+1. What workload/problem motivated it?
+2. What failure model does it assume?
+3. Where is ordering established?
+4. What consistency/availability trade-off is made?
+5. What new complexity does the design introduce?
+
+## Courses
+
+- **MIT 6.5840 Distributed Systems**
+- **CMU 15-445/645 Database Systems**
+- **Stanford CS244B Distributed Systems** as an additional option
+
+---
+
+# Final mental model
+
+System design is not:
+
+```text
+Redis
+Kafka
+Kubernetes
+Microservices
+```
+
+System design is:
 
 ```text
 Requirements
+    ↓
+Invariants
     ↓
 Traffic and scale
     ↓
 API / communication model
     ↓
-Application behavior
+Runtime behavior
     ↓
 Data model and storage
     ↓
-Infrastructure
+Code/domain boundaries
     ↓
-Distributed-system guarantees
+Async integration where justified
     ↓
-Failure handling
+Infrastructure and deployment
     ↓
-Security + observability + cost
+Distributed guarantees
     ↓
-Trade-offs
+Geo placement only when required
+    ↓
+Failure + recovery
+    ↓
+Security + observability + performance + cost
+    ↓
+Evolution and trade-offs
 ```
 
-When you understand the lower layers, "system design" stops looking like a collection of random diagrams. REST, WebSocket, Kafka, Redis, databases, load balancers, Docker, replication, and sharding become tools. The real skill is knowing which tool solves which problem, what new problems it introduces, and whether the system actually needs it.
+The decisive skill is not knowing every technology. It is knowing:
+
+- what problem a mechanism solves
+- how it behaves under failure
+- how to measure whether it helps
+- what complexity it introduces
+- when a simpler design is better
+- how to evolve the architecture without rewriting everything
+
+> **Architecture quality is the quality of the trade-offs you can explain, test, operate, and reverse.**
